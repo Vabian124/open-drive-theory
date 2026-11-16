@@ -32,6 +32,6 @@
 - [x] Roundabout templates yield through bord B6 or haaientanden. Articles 47 and 48 only relax keep-right and allow passing on the right.
 - [x] The Three.js skin (`src/web/mount_3d.ts`) loads after the button click. The solver still reads only layers 1–4.
 
-## Nog niet gepubliceerd
+## Publicatie
 
-De bronlink wijst naar `https://github.com/Vabian124/open-drive-theory`. Die repository is vanuit deze werkmap niet aangemaakt, niet gepusht en niet aan een host gekoppeld.
+De bronlink wijst naar `https://github.com/Vabian124/open-drive-theory`. `.github/workflows/deploy.yml` bouwt met `npm run build` en publiceert `dist` naar GitHub Pages.
