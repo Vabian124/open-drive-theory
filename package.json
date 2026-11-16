@@ -8,7 +8,8 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "preview": "vite-node preview/generate-preview.ts"
   },
   "dependencies": {
     "ts-fsrs": "^4.3.0",
