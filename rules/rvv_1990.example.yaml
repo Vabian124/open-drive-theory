@@ -1,0 +1,101 @@
+# [EXAMPLE TEMPLATE]
+# Replace this file with rules/rvv_1990.yaml once BWBR0004825 is segmented
+# into atomic rule cards. Bracketed sentences are not quotations.
+#
+# Corrected against the statute (art. 15 lid 2):
+#   RVV-15.2a = onverharde weg verleent voorrang aan verharde weg
+#   RVV-15.2b = voorrang aan de bestuurder van een tram
+# verified: true  = V0.1 must apply this duty. The golden cases lock it.
+# verified: false = V0.1 must emit a gap and must not guess a duty.
+# An [EXAMPLE] sentence is never a quotation, even on a verified card.
+# Working lights versus article 54 are not verified. No golden case uses
+# an officer or a traffic light.
+
+meta:
+  jurisdiction: "NL"
+  source_law: "RVV 1990 (BWBR0004825) - [EXAMPLE PLACEHOLDERS]"
+  version: "0.1-example"
+
+hierarchy:
+  - rank: 10
+    rule_id: "RVV-82"
+    topic: "priority"
+    title: "Aanwijzingen van bevoegd gezag"
+    statutory_text_placeholder: "[EXAMPLE: weggebruikers volgen de aanwijzingen van een bevoegd ambtenaar. De letterlijke tekst van artikel 82 ontbreekt in deze kaart.]"
+    condition_spec: "environment.traffic_officer === true -> gap, do not rank this card"
+    overrides: []
+    verified: false
+
+  - rank: 20
+    rule_id: "RVV-64"
+    topic: "priority"
+    title: "Werkende verkeerslichten gaan boven voorrangstekens"
+    statutory_text_placeholder: "[EXAMPLE: verkeerslichten gaan boven de voorrangsborden B1–B7 en boven haaientanden. Niet vastgelegd in deze kaart: of ze ook artikel 54 uitschakelen.]"
+    condition_spec: "environment.traffic_lights !== 'none' -> gap, do not rank this card"
+    overrides: []
+    verified: false
+
+  - rank: 30
+    rule_id: "RVV-SIGNS-B1-B7"
+    topic: "priority"
+    title: "Voorrangsborden en haaientanden"
+    statutory_text_placeholder: "[EXAMPLE: een bestuurder bij NL:B6, NL:B7 of haaientanden verleent voorrang aan bestuurders op de kruisende weg. NL:B1 merkt de eigen weg als voorrangsweg.]"
+    condition_spec: "static_signs contains NL:B6 or NL:B7 or give_way_triangles, or the other arm carries NL:B1 while this arm has no yield sign"
+    overrides: ["RVV-15.2a", "RVV-15.2b", "RVV-15.1"]
+    verified: true
+
+  - rank: 40
+    rule_id: "RVV-54"
+    topic: "priority"
+    title: "Bijzondere manoeuvre, waaronder een uitrit verlaten"
+    statutory_text_placeholder: "[EXAMPLE: wie een bijzondere manoeuvre uitvoert, laat het overige verkeer voorgaan. De visuele uitritcriteria komen uit rechtspraak en CROW, niet uit een definitie in het RVV.]"
+    condition_spec: "actor.from_arm.curb_type === 'beveled'"
+    required_visual_cues: ["beveled_curb", "continuous_sidewalk"]
+    overrides: ["RVV-15.2a", "RVV-15.2b", "RVV-15.1", "RVV-18.1", "RVV-18.2"]
+    verified: true
+
+  - rank: 50
+    rule_id: "RVV-15.2a"
+    topic: "priority"
+    title: "Onverharde weg verleent voorrang aan verharde weg"
+    statutory_text_placeholder: "[STATUTE, art. 15 lid 2 onder a: bestuurders op een onverharde weg verlenen voorrang aan bestuurders op een verharde weg.]"
+    condition_spec: "own arm.surface === 'unpaved' && other arm.surface === 'paved'"
+    required_visual_cues: ["unpaved_texture"]
+    overrides: ["RVV-15.1"]
+    verified: true
+
+  - rank: 60
+    rule_id: "RVV-15.2b"
+    topic: "priority"
+    title: "Voorrang aan een tram op een kruispunt"
+    statutory_text_placeholder: "[STATUTE, art. 15 lid 2 onder b: bestuurders verlenen voorrang aan bestuurders van een tram.]"
+    condition_spec: "other actor.type === 'tram' && no higher sign, light, officer, or special manoeuvre decides the pair"
+    overrides: ["RVV-15.1", "RVV-18.1", "RVV-18.2"]
+    verified: true
+
+  - rank: 70
+    rule_id: "RVV-15.1"
+    topic: "priority"
+    title: "Bestuurders van rechts gaan voor"
+    statutory_text_placeholder: "[STATUTE, art. 15 lid 1: op kruispunten verlenen bestuurders voorrang aan voor hen van rechts komende bestuurders.]"
+    condition_spec: "both are drivers && the other approach is from the right && their connectors conflict"
+    overrides: []
+    verified: true
+
+  - rank: 80
+    rule_id: "RVV-18.1"
+    topic: "priority"
+    title: "Rechtdoor op dezelfde weg gaat voor"
+    statutory_text_placeholder: "[STATUTE, art. 18 lid 1: wie afslaat, laat verkeer op dezelfde weg dat tegemoetkomt of naast dan wel dicht achter hem rijdt, voorgaan. Lid 3: dit geldt niet voor een tram.]"
+    condition_spec: "same road && turning driver is not a tram && the other traffic goes straight"
+    overrides: []
+    verified: true
+
+  - rank: 90
+    rule_id: "RVV-18.2"
+    topic: "priority"
+    title: "Korte bocht gaat voor lange bocht"
+    statutory_text_placeholder: "[STATUTE, art. 18 lid 2: wie links afslaat, laat de tegenligger die rechts afslaat voorgaan. Lid 3: dit geldt niet voor een tram.]"
+    condition_spec: "opposite arms && one turns left && the other turns right && the left-turning driver is not a tram"
+    overrides: []
+    verified: true

@@ -1,0 +1,34 @@
+# Project Rules: open-drive-theory (AGPL-3.0)
+
+## 1. Core Philosophy
+
+- **Deterministic Rules Only:** NEVER use an LLM, heuristic guesswork, or randomness to determine right-of-way or traffic rule outcomes. All legal outcomes in `src/solver/` MUST be computed deterministically from geometry and the rule definitions in `rules/`.
+- **Contract-First:** Every data structure passing between modules MUST be validated by Zod schemas in `src/schema/`.
+
+## 2. Strict Module Boundaries (Import Rules)
+
+- `src/schema/` is the core contract: it MAY NOT import from any other `src/` directory.
+- `src/solver/`, `src/generator/`, `src/narrator/`, `src/renderer/`, and `src/learning/` MAY ONLY import from `src/schema/` and `rules/`.
+- Sibling modules (`solver`, `generator`, `narrator`, `renderer`) MUST NOT import from each other.
+
+## 3. Anti-Hardcoding & Golden Test Integrity
+
+- **NEVER modify `cases/golden_v1.yaml`** unless the user explicitly instructs you to.
+- **NO Reward Hacking / Hardcoding:** `src/solver/` MUST compute priority orders from general geometric relationships (`angle_deg`, `connectors`), surface/curb properties, signs, and statutory hierarchy. NEVER write `if` statements matching specific scenario IDs, actor IDs, coordinates, or sign combinations that exist only to pass a test case.
+- Every change to `src/solver/` or `src/schema/` MUST pass `npm run typecheck` and `npm test`.
+
+## 4. Visual Fidelity Contract
+
+- `src/renderer/` must faithfully render every legal cue present in `infra` and `static_signs` (for example `curb_type: "beveled"` for an exit construction, `surface: "unpaved"`, `cycleway: "lane"` versus `"track"`, and the exact `NL:*` traffic signs). Never omit a cue that affects right-of-way.
+
+## 5. Incomplete statute
+
+- `rules/rvv_1990.example.yaml` is a placeholder. Do not treat a bracketed `[EXAMPLE]` sentence as a quotation from BWBR0004825.
+- Where a rule card marks an override as unverified, do not invent the missing article text. Emit an explicit gap instead of a guessed duty.
+- Article 15 lid 2 is fixed: onder a is the unpaved road (`RVV-15.2a`), onder b is the tram (`RVV-15.2b`).
+
+## 6. Licensing & Headers
+
+- Every new `.ts` file MUST start with:
+  `// SPDX-License-Identifier: AGPL-3.0-only`
+- Any web UI component must preserve a visible AGPL-3.0 Section 13 source-link footer.

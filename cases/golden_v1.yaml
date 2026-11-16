@@ -1,0 +1,189 @@
+# GOLDEN MASTER TEST SUITE (V1)
+# Original rule abstractions. Not copies of CBR exam items.
+# DO NOT EDIT unless the maintainer explicitly asks.
+# Rule ids follow art. 15 lid 2: RVV-15.2a unpaved, RVV-15.2b tram.
+
+cases:
+  - id: "example_case_01_equal_right"
+    description: "[EXAMPLE] Gelijkwaardig kruispunt. De auto van rechts gaat voor de kandidaat die rechtdoor rijdt."
+    category: "B"
+    infra:
+      intersection_type: "four_way"
+      arms:
+        - { arm_id: "arm_0", angle_deg: 0, surface: "paved", curb_type: "standard", cycleway: "none" }
+        - { arm_id: "arm_90", angle_deg: 90, surface: "paved", curb_type: "standard", cycleway: "none" }
+        - { arm_id: "arm_180", angle_deg: 180, surface: "paved", curb_type: "standard", cycleway: "none" }
+        - { arm_id: "arm_270", angle_deg: 270, surface: "paved", curb_type: "standard", cycleway: "none" }
+      connectors:
+        - { from_arm: "arm_0", to_arm: "arm_180", turn: "straight" }
+        - { from_arm: "arm_270", to_arm: "arm_90", turn: "straight" }
+    static_signs:
+      signs: []
+      markings: []
+    environment:
+      traffic_officer: false
+      traffic_lights: "none"
+      built_up_area: true
+      road_condition: "dry"
+      obstructions: []
+    actors:
+      - { id: "candidate_car", type: "car", from_arm: "arm_0", to_arm: "arm_180", speed_kmh: 30, is_candidate: true }
+      - { id: "right_car", type: "car", from_arm: "arm_270", to_arm: "arm_90", speed_kmh: 30, is_candidate: false }
+    expected:
+      priority_order: ["right_car", "candidate_car"]
+      candidate_yields_to: ["right_car"]
+      applied_rule_ids: ["RVV-15.1"]
+
+  - id: "example_case_02_straight_same_road_cyclist"
+    description: "[EXAMPLE] De kandidaat slaat rechtsaf. Een fietser op de fietsstrook (cycleway lane) van dezelfde weg gaat rechtdoor."
+    category: "B"
+    infra:
+      intersection_type: "four_way"
+      arms:
+        - { arm_id: "arm_0", angle_deg: 0, surface: "paved", curb_type: "standard", cycleway: "lane" }
+        - { arm_id: "arm_180", angle_deg: 180, surface: "paved", curb_type: "standard", cycleway: "lane" }
+        - { arm_id: "arm_270", angle_deg: 270, surface: "paved", curb_type: "standard", cycleway: "none" }
+      connectors:
+        - { from_arm: "arm_0", to_arm: "arm_270", turn: "right" }
+        - { from_arm: "arm_0", to_arm: "arm_180", turn: "straight" }
+    static_signs:
+      signs: []
+      markings: []
+    environment:
+      traffic_officer: false
+      traffic_lights: "none"
+      built_up_area: true
+      road_condition: "dry"
+      obstructions: []
+    actors:
+      - { id: "candidate_car", type: "car", from_arm: "arm_0", to_arm: "arm_270", speed_kmh: 30, is_candidate: true }
+      - { id: "cyclist_straight", type: "cyclist", from_arm: "arm_0", to_arm: "arm_180", speed_kmh: 20, is_candidate: false }
+    expected:
+      priority_order: ["cyclist_straight", "candidate_car"]
+      candidate_yields_to: ["cyclist_straight"]
+      applied_rule_ids: ["RVV-18.1"]
+
+  - id: "example_case_03_exit_construction"
+    description: "[EXAMPLE] De kandidaat verlaat een uitrit (beveled curb) en laat de auto op de doorgaande weg voorgaan, ook al komt die van links."
+    category: "B"
+    infra:
+      intersection_type: "exit_construction"
+      arms:
+        - { arm_id: "arm_0", angle_deg: 0, surface: "paved", curb_type: "beveled", cycleway: "none" }
+        - { arm_id: "arm_90", angle_deg: 90, surface: "paved", curb_type: "standard", cycleway: "none" }
+        - { arm_id: "arm_270", angle_deg: 270, surface: "paved", curb_type: "standard", cycleway: "none" }
+      connectors:
+        - { from_arm: "arm_0", to_arm: "arm_270", turn: "right" }
+        - { from_arm: "arm_90", to_arm: "arm_270", turn: "straight" }
+    static_signs:
+      signs: []
+      markings: []
+    environment:
+      traffic_officer: false
+      traffic_lights: "none"
+      built_up_area: true
+      road_condition: "dry"
+      obstructions: []
+    actors:
+      - { id: "candidate_car", type: "car", from_arm: "arm_0", to_arm: "arm_270", speed_kmh: 15, is_candidate: true }
+      - { id: "left_car", type: "car", from_arm: "arm_90", to_arm: "arm_270", speed_kmh: 30, is_candidate: false }
+    expected:
+      priority_order: ["left_car", "candidate_car"]
+      candidate_yields_to: ["left_car"]
+      applied_rule_ids: ["RVV-54"]
+
+  - id: "example_case_04_unpaved_road"
+    description: "[EXAMPLE] De auto van rechts komt van een onverharde weg. De kandidaat op de verharde weg gaat voor."
+    category: "A"
+    infra:
+      intersection_type: "four_way"
+      arms:
+        - { arm_id: "arm_0", angle_deg: 0, surface: "paved", curb_type: "standard", cycleway: "none" }
+        - { arm_id: "arm_90", angle_deg: 90, surface: "paved", curb_type: "standard", cycleway: "none" }
+        - { arm_id: "arm_180", angle_deg: 180, surface: "paved", curb_type: "standard", cycleway: "none" }
+        - { arm_id: "arm_270", angle_deg: 270, surface: "unpaved", curb_type: "standard", cycleway: "none" }
+      connectors:
+        - { from_arm: "arm_0", to_arm: "arm_180", turn: "straight" }
+        - { from_arm: "arm_270", to_arm: "arm_90", turn: "straight" }
+    static_signs:
+      signs: []
+      markings: []
+    environment:
+      traffic_officer: false
+      traffic_lights: "none"
+      built_up_area: false
+      road_condition: "dry"
+      obstructions: []
+    actors:
+      - { id: "candidate_moto", type: "motorcycle", from_arm: "arm_0", to_arm: "arm_180", speed_kmh: 50, is_candidate: true }
+      - { id: "unpaved_car", type: "car", from_arm: "arm_270", to_arm: "arm_90", speed_kmh: 20, is_candidate: false }
+    expected:
+      priority_order: ["candidate_moto", "unpaved_car"]
+      candidate_yields_to: []
+      applied_rule_ids: ["RVV-15.2a"]
+
+  - id: "example_case_05_tram_equal_vs_signs"
+    description: "[EXAMPLE] Een tram nadert achter NL:B6 en haaientanden. De kandidaat rijdt op de voorrangsweg (NL:B1) en gaat voor."
+    category: "AM"
+    infra:
+      intersection_type: "four_way"
+      arms:
+        - { arm_id: "arm_0", angle_deg: 0, surface: "paved", curb_type: "standard", cycleway: "none" }
+        - { arm_id: "arm_90", angle_deg: 90, surface: "paved", curb_type: "standard", cycleway: "none" }
+        - { arm_id: "arm_180", angle_deg: 180, surface: "paved", curb_type: "standard", cycleway: "none" }
+        - { arm_id: "arm_270", angle_deg: 270, surface: "paved", curb_type: "standard", cycleway: "none" }
+      connectors:
+        - { from_arm: "arm_0", to_arm: "arm_180", turn: "straight" }
+        - { from_arm: "arm_90", to_arm: "arm_270", turn: "straight" }
+    static_signs:
+      signs:
+        - { arm_id: "arm_0", code: "NL:B1" }
+        - { arm_id: "arm_180", code: "NL:B1" }
+        - { arm_id: "arm_90", code: "NL:B6" }
+        - { arm_id: "arm_270", code: "NL:B6" }
+      markings:
+        - { arm_id: "arm_90", type: "give_way_triangles" }
+        - { arm_id: "arm_270", type: "give_way_triangles" }
+    environment:
+      traffic_officer: false
+      traffic_lights: "none"
+      built_up_area: true
+      road_condition: "dry"
+      obstructions: []
+    actors:
+      - { id: "candidate_moped", type: "moped", from_arm: "arm_0", to_arm: "arm_180", speed_kmh: 30, is_candidate: true }
+      - { id: "yielding_tram", type: "tram", from_arm: "arm_90", to_arm: "arm_270", speed_kmh: 30, is_candidate: false }
+    expected:
+      priority_order: ["candidate_moped", "yielding_tram"]
+      candidate_yields_to: []
+      applied_rule_ids: ["RVV-SIGNS-B1-B7"]
+
+  - id: "example_case_06_short_turn_before_long_turn"
+    description: "[EXAMPLE] De tegenligger slaat rechtsaf. De kandidaat slaat linksaf en laat die korte bocht voorgaan."
+    category: "B"
+    infra:
+      intersection_type: "four_way"
+      arms:
+        - { arm_id: "arm_0", angle_deg: 0, surface: "paved", curb_type: "standard", cycleway: "none" }
+        - { arm_id: "arm_90", angle_deg: 90, surface: "paved", curb_type: "standard", cycleway: "none" }
+        - { arm_id: "arm_180", angle_deg: 180, surface: "paved", curb_type: "standard", cycleway: "none" }
+        - { arm_id: "arm_270", angle_deg: 270, surface: "paved", curb_type: "standard", cycleway: "none" }
+      connectors:
+        - { from_arm: "arm_0", to_arm: "arm_90", turn: "left" }
+        - { from_arm: "arm_180", to_arm: "arm_90", turn: "right" }
+    static_signs:
+      signs: []
+      markings: []
+    environment:
+      traffic_officer: false
+      traffic_lights: "none"
+      built_up_area: true
+      road_condition: "dry"
+      obstructions: []
+    actors:
+      - { id: "candidate_car", type: "car", from_arm: "arm_0", to_arm: "arm_90", speed_kmh: 30, is_candidate: true }
+      - { id: "oncoming_right_car", type: "car", from_arm: "arm_180", to_arm: "arm_90", speed_kmh: 30, is_candidate: false }
+    expected:
+      priority_order: ["oncoming_right_car", "candidate_car"]
+      candidate_yields_to: ["oncoming_right_car"]
+      applied_rule_ids: ["RVV-18.2"]

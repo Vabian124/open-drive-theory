@@ -1,0 +1,23 @@
+{
+  "name": "open-drive-theory",
+  "version": "0.1.0",
+  "description": "Deterministic open-source Dutch traffic theory engine (B, AM, A) based on OpenDRIVE topology and OSM tags.",
+  "license": "AGPL-3.0-only",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ts-fsrs": "^4.3.0",
+    "yaml": "^2.5.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.0",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}
