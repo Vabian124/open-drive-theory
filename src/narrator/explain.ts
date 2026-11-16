@@ -2,6 +2,7 @@
 import { classifyTurn } from "../schema/geometry.js";
 import { NarrationSchema, type Narration } from "../schema/narration.js";
 import { roadPosition } from "../schema/position.js";
+import { mopedSpeedLimit } from "../schema/speed.js";
 import {
   EvaluationSchema,
   ScenarioSchema,
@@ -20,7 +21,9 @@ const RULE_GLOSS: Record<string, string> = {
   "RVV-SIGNS-B1-B7": "Bord B6, bord B7 of haaientanden verplichten tot voorrang verlenen. Bord B1 merkt de voorrangsweg.",
   "RVV-50": "Weggebruikers laten een voorrangsvoertuig voorgaan. Dat voert het blauwe licht en de hoorn van artikel 29.",
   "RVV-49": "Op een voetgangersoversteekplaats laat u de overstekende voetganger voorgaan.",
-  "RVV-16": "U mag een militaire kolonne niet doorsnijden.",
+  "RVV-16": "U mag een militaire colonne of een uitvaartstoet van motorvoertuigen niet doorsnijden.",
+  "RVV-20": "Binnen de bebouwde kom geldt voor een bromfiets 45 km per uur op de rijbaan en 30 km per uur op het fiets/bromfietspad.",
+  "RVV-21": "Buiten de bebouwde kom geldt voor een bromfiets 45 km per uur op de rijbaan en 40 km per uur op het fiets/bromfietspad.",
   "RVV-68": "Rood of geel licht betekent stop. Groen licht betekent doorgaan.",
   "RVV-82": "U volgt de aanwijzing van de verkeersregelaar. Die gaat boven borden en regels.",
   "RVV-6": "Een bromfiets gebruikt het fiets/bromfietspad, en anders de rijbaan.",
@@ -139,7 +142,11 @@ function mistakePool(scenario: Scenario, evaluation: Evaluation): string[] {
     pool.push("Een voetganger op een zebrapad wacht op bestuurders.");
   }
   if (rules.has("RVV-16")) {
-    pool.push("U mag een militaire kolonne doorsnijden als u van rechts komt.");
+    pool.push(
+      other?.type === "funeral_procession"
+        ? "U mag een uitvaartstoet van motorvoertuigen doorsnijden als u van rechts komt."
+        : "U mag een militaire kolonne doorsnijden als u van rechts komt.",
+    );
   }
   if (rules.has("RVV-68")) {
     pool.push("Rood licht geldt alleen als er geen bestuurder van rechts komt.");
@@ -204,6 +211,10 @@ function explanation(scenario: Scenario, evaluation: Evaluation, candidate: Acto
       lines.push(`${ruleId}: ${place.text}`);
     }
   }
+  const speed = mopedSpeedLimit(scenario);
+  if (speed) {
+    lines.push(`${speed.ruleId}: ${speed.text}`);
+  }
   return lines;
 }
 
@@ -224,7 +235,13 @@ function gapLine(gap: string): string {
     return "RVV-50: twee voorrangsvoertuigen. De tekst wijst geen onderlinge volgorde aan.";
   }
   if (gap === "RVV-16-two") {
-    return "RVV-16: twee militaire kolonnes. De tekst wijst geen onderlinge volgorde aan.";
+    return "RVV-16: twee militaire colonnes. De tekst wijst geen onderlinge volgorde aan.";
+  }
+  if (gap === "RVV-16-two-funerals") {
+    return "RVV-16: twee uitvaartstoeten van motorvoertuigen. De tekst wijst geen onderlinge volgorde aan.";
+  }
+  if (gap === "RVV-16-unranked") {
+    return "RVV-16: een militaire colonne en een uitvaartstoet. De tekst wijst geen onderlinge volgorde aan.";
   }
   if (gap === "b3-b4-b5-diagram") {
     return "b3-b4-b5-diagram: dit bord krijgt in deze toestand geen voorrangsplicht.";
@@ -279,6 +296,23 @@ export function narratePosition(scenario: Scenario): Narration | null {
     options: [place.text, ...wrong],
     correctIndex: 0,
     explanation: place.ruleIds.map((ruleId) => `${ruleId}: ${place.text}`),
+  });
+}
+
+export function narrateSpeed(scenario: Scenario): Narration | null {
+  const limit = mopedSpeedLimit(ScenarioSchema.parse(scenario));
+  if (!limit) {
+    return null;
+  }
+  const wrong = [30, 40, 45, 25]
+    .filter((kmh) => kmh !== limit.kmh)
+    .slice(0, 3)
+    .map((kmh) => `${kmh} km per uur.`);
+  return NarrationSchema.parse({
+    question: "Welke maximumsnelheid geldt voor uw bromfiets?",
+    options: [limit.text, ...wrong],
+    correctIndex: 0,
+    explanation: [`${limit.ruleId}: ${limit.text}`],
   });
 }
 

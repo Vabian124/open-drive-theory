@@ -28,11 +28,15 @@ function empty(gaps: string[]): SolveResult {
 }
 
 function isDriver(actor: Actor): boolean {
-  return actor.type !== "pedestrian" && actor.type !== "funeral_procession";
+  return actor.type !== "pedestrian";
 }
 
 function isOnFoot(actor: Actor): boolean {
-  return actor.type === "pedestrian" || actor.type === "funeral_procession";
+  return actor.type === "pedestrian";
+}
+
+function isFuneral(actor: Actor): boolean {
+  return actor.type === "funeral_procession";
 }
 
 function armMap(scenario: Scenario): Map<string, Arm> {
@@ -85,8 +89,14 @@ function signDuty(a: Actor, b: Actor, scenario: Scenario, arms: ReadonlyMap<stri
   if (!pathsInteract(a, b, arms)) {
     return null;
   }
-  const aYields = driverYieldsBySign(a, b, scenario);
-  const bYields = driverYieldsBySign(b, a, scenario);
+  let aYields = driverYieldsBySign(a, b, scenario);
+  let bYields = driverYieldsBySign(b, a, scenario);
+  if (a.type === "military_column" && isFuneral(b)) {
+    aYields = false;
+  }
+  if (b.type === "military_column" && isFuneral(a)) {
+    bYields = false;
+  }
   if (aYields === bYields) {
     return null;
   }
@@ -275,7 +285,8 @@ function hasCrosswalk(scenario: Scenario, armId: string): boolean {
 function crosswalkDuty(a: Actor, b: Actor, scenario: Scenario, arms: ReadonlyMap<string, Arm>): PairResult {
   const foot = isOnFoot(a) ? a : isOnFoot(b) ? b : undefined;
   const driver = foot === a ? b : foot === b ? a : undefined;
-  if (!foot || !driver || !isDriver(driver) || driver.type === "military_column" || !pathsInteract(a, b, arms)) {
+  const columnExempt = driver?.type === "military_column" || (driver !== undefined && isFuneral(driver));
+  if (!foot || !driver || !isDriver(driver) || columnExempt || !pathsInteract(a, b, arms)) {
     return { kind: "none" };
   }
   if (foot.signal === "red") {
@@ -296,10 +307,33 @@ function columnDuty(a: Actor, b: Actor, arms: ReadonlyMap<string, Arm>): PairRes
   if (!pathsInteract(a, b, arms)) {
     return { kind: "none" };
   }
+  if ((aColumn && isFuneral(b)) || (bColumn && isFuneral(a))) {
+    return { kind: "none" };
+  }
   if (aColumn && bColumn) {
     return { kind: "gap", id: "RVV-16-two" };
   }
   return aColumn
+    ? { kind: "duty", duty: { loser: b.id, winner: a.id, ruleId: "RVV-16" } }
+    : { kind: "duty", duty: { loser: a.id, winner: b.id, ruleId: "RVV-16" } };
+}
+
+function funeralDuty(a: Actor, b: Actor, arms: ReadonlyMap<string, Arm>): PairResult {
+  const aFuneral = isFuneral(a);
+  const bFuneral = isFuneral(b);
+  if (!aFuneral && !bFuneral) {
+    return { kind: "none" };
+  }
+  if (!pathsInteract(a, b, arms)) {
+    return { kind: "none" };
+  }
+  if (aFuneral && bFuneral) {
+    return { kind: "gap", id: "RVV-16-two-funerals" };
+  }
+  if (a.type === "military_column" || b.type === "military_column") {
+    return { kind: "gap", id: "RVV-16-unranked" };
+  }
+  return aFuneral
     ? { kind: "duty", duty: { loser: b.id, winner: a.id, ruleId: "RVV-16" } }
     : { kind: "duty", duty: { loser: a.id, winner: b.id, ruleId: "RVV-16" } };
 }
@@ -345,6 +379,12 @@ function decidePair(
     const signs = signDuty(a, b, scenario, arms);
     if (signs) {
       return { kind: "duty", duty: signs };
+    }
+  }
+  if (active.has("RVV-16")) {
+    const funeral = funeralDuty(a, b, arms);
+    if (funeral.kind !== "none") {
+      return funeral;
     }
   }
   if (active.has("RVV-54")) {

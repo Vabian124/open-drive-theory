@@ -77,16 +77,16 @@ function crossing(input: {
   });
 }
 
-describe("BWBR0004825 toestand 2002-03-30", () => {
+describe("BWBR0004825 toestand 2026-07-01", () => {
   it("quotes that consolidation and keeps the example archive unverified", () => {
-    expect(rules.meta.version).toBe("2002-03-30");
+    expect(rules.meta.version).toBe("2026-07-01");
     expect(rules.hierarchy.find((card) => card.rule_id === "RVV-64")?.verified).toBe(true);
     expect(rules.hierarchy.find((card) => card.rule_id === "RVV-82")?.verified).toBe(true);
     const example = loadRuleFile("rules/rvv_1990.example.yaml");
     expect(example.hierarchy.find((card) => card.rule_id === "RVV-64")?.verified).toBe(false);
     const yellow = rules.hierarchy.find((card) => card.rule_id === "RVV-30");
     expect(yellow?.verified).toBe(true);
-    expect(yellow?.statutory_text_placeholder).toContain("geel zwaai- of knipperlicht");
+    expect(yellow?.statutory_text_placeholder).toContain("geel of groen");
   });
 
   it("lets a pedestrian on a crosswalk go first and withholds that duty without the marking", () => {
@@ -131,20 +131,17 @@ describe("BWBR0004825 toestand 2002-03-30", () => {
     expect(amber.applied_rule_ids).toEqual(["RVV-49"]);
   });
 
-  it("treats a funeral as pedestrians only on a crosswalk", () => {
-    const onFoot = solve(
+  it("keeps a motor funeral off the crosswalk duty in article 49 lid 3", () => {
+    const marked = solve(
       crossing({
-        other: "funeral_procession",
+        candidateType: "funeral_procession",
+        other: "pedestrian",
         markings: [{ arm_id: "arm_270", type: "crosswalk" }],
       }),
       rules,
     );
-    expect(onFoot.applied_rule_ids).toEqual(["RVV-49"]);
-
-    const onRoad = solve(crossing({ other: "funeral_procession" }), rules);
-    expect(onRoad.applied_rule_ids).toEqual([]);
-    expect(onRoad.candidate_yields_to).toEqual([]);
-    expect(narrateScenario(crossing({ other: "funeral_procession" }), onRoad).explanation.join(" ")).not.toMatch(/RVV-16/);
+    expect(marked.applied_rule_ids).toEqual(["RVV-16"]);
+    expect(marked.candidate_yields_to).toEqual([]);
   });
 
   it("does not let a military column yield on a crosswalk, and does not invent an order between two columns", () => {

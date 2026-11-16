@@ -53,7 +53,7 @@ npm run fetch-law
 - V1.5: gevaarherkenning van vijf seconden op artikel 19, met snelheid, wegdek en obstakels.
 - V2.0: rotondes via bord B6 of haaientanden, en een optioneel Three.js-aanzicht.
 
-De solver leest `rules/rvv_1990.yaml`. De citaten komen uit BWBR0004825 in de toestand van 30 maart 2002. `rules/rvv_1990.example.yaml` blijft het voorbeeldarchief. Een verkeersregelaar zonder gebaar en een actief licht zonder kleur geven nog steeds een gat. Artikel 30 is geen voorrangssein. De artikelen 47 en 48 wijzen op een rotonde geen voorrang toe.
+De solver leest `rules/rvv_1990.yaml`. De citaten komen uit BWBR0004825 in de toestand van 1 juli 2026. `rules/rvv_1990.example.yaml` blijft het voorbeeldarchief. Een verkeersregelaar zonder gebaar en een actief licht zonder kleur geven nog steeds een gat. Artikel 30 is geen voorrangssein. De artikelen 47 en 48 wijzen op een rotonde geen voorrang toe. Artikel 16 verbiedt het doorsnijden van een militaire colonne en van een uitvaartstoet van motorvoertuigen. Voor een bromfiets gelden de artikelen 20 en 21: 45 km per uur op de rijbaan, en op bord G12a 30 km per uur binnen de bebouwde kom en 40 km per uur daarbuiten.
 
 De bronlink is `https://github.com/Vabian124/open-drive-theory`. De repository is nog niet gepubliceerd en niet aan een host gekoppeld.
 

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 import { createFsrsTracker, type FsrsTracker, type RuleMastery } from "../learning/fsrs_tracker.js";
-import { narrateHazard, narratePosition } from "../narrator/explain.js";
+import { narrateHazard, narratePosition, narrateSpeed } from "../narrator/explain.js";
 import { withApproachMotion } from "../renderer/motion.js";
 import type { RuleFile } from "../schema/rules.js";
 import type { Category } from "../schema/scenario.js";
@@ -23,7 +23,7 @@ const RULE_TITLES: Record<string, string> = {
   "RVV-SIGNS-B1-B7": "Borden en haaientanden",
   "RVV-49": "Voetgangersoversteekplaats",
   "RVV-50": "Voorrangsvoertuig",
-  "RVV-16": "Militaire kolonne",
+  "RVV-16": "Militaire colonne en uitvaartstoet",
 };
 
 const LETTERS = ["A", "B", "C", "D"] as const;
@@ -211,6 +211,7 @@ export class OpenDriveTheoryQuiz extends HTMLElement {
     const feedback = this.feedback;
     const hazard = narrateHazard(view.scenario);
     const position = narratePosition(view.scenario);
+    const speed = narrateSpeed(view.scenario);
     const picture = hazard ? withApproachMotion(view.svg) : view.svg;
     const mastery = tracker.getRuleMastery();
     const focus = tracker.getNextFocusRule();
@@ -233,6 +234,7 @@ export class OpenDriveTheoryQuiz extends HTMLElement {
       <figure class="drawing">${picture}</figure>
       ${studyBlock("hazard", "Gevaarherkenning", hazard)}
       ${studyBlock("position", "Positie op de weg", position)}
+      ${studyBlock("speed", "Maximumsnelheid", speed)}
       <p class="question">${esc(view.question)}</p>
       <div class="options">${view.options
         .map((option, index) => optionButton(option.id, LETTERS[index] ?? String(index + 1), option.text, feedback))

@@ -6,7 +6,7 @@
 - [x] **Step 2:** Implement the 5-layer Zod schemas and inferred TypeScript types in `src/schema/scenario.ts`.
 - [x] **Step 3:** Build a YAML loader in `src/schema/loader.ts` that parses `rules/rvv_1990.example.yaml` and `cases/golden_v1.yaml`.
 - [x] **Step 4:** Implement trajectory conflict detection (`src/schema/geometry.ts`, shared by the solver and the generator) using `angle_deg` and `connectors` (relative approach: right, opposite, left, same road).
-- [x] **Step 5:** Implement the deterministic priority solver (`src/solver/priority_solver.ts`). The live cards are `rules/rvv_1990.yaml`, quoted from BWBR0004825 in the consolidation of 30 March 2002. An officer without a gesture per driver still returns gap `RVV-82`. Active lights without a colour per driver still return gap `RVV-64`. Flashing amber is article 75 and does not cancel signs. Above the older duties sit article 50 (priority vehicle; article 29 defines the signals, article 30 does not yield), article 49 lid 2 (crosswalk), and article 16 (military column). Article 9 permits a funeral on the carriageway and does not by itself create a yield.
+- [x] **Step 5:** Implement the deterministic priority solver (`src/solver/priority_solver.ts`). The live cards are `rules/rvv_1990.yaml`, quoted from BWBR0004825 in the consolidation of 1 July 2026. An officer without a gesture per driver still returns gap `RVV-82`. Active lights without a colour per driver still return gap `RVV-64`. Flashing amber is article 75 and does not cancel signs. Above the older duties sit article 50 (priority vehicle; article 29 defines the signals, article 30 does not yield), article 49 lid 2 (crosswalk; lid 3 exempts a military column and a motor funeral), and article 16 (do not cut a military column or a motor funeral). Signs, shark teeth, lights, an officer and a priority vehicle still outrank that funeral. Article 9 only permits pedestrians to use the carriageway. Articles 20 and 21 set the moped limits and are not priority duties.
 - [x] **Step 6:** Wire up `tests/golden.test.ts` and iterate on `src/solver/` until every case in `cases/golden_v1.yaml` passes. Do not edit that file to make a test pass.
 
 ## Phase V0.2 — Seeded Generator & B / AM / A Narrator
@@ -25,7 +25,7 @@
 ## V1.5 — Gevaarherkenning
 
 - [x] A five-second approach animation (`src/renderer/motion.ts`) when the road is icy, blocked, or wet at 45 km/h or more.
-- [x] The study question cites article 19 from the 2002 text. It does not invent a following distance or an ADAS duty.
+- [x] The study question cites article 19 from the 1 July 2026 text. It does not invent a following distance or an ADAS duty.
 
 ## V2.0 — Rotonde en optionele 3D-huid
 

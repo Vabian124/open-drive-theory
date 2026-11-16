@@ -1,9 +1,11 @@
 {
   "identifier": "BWBR0004825",
   "title": "Reglement verkeersregels en verkeerstekens 1990",
-  "source_url": "https://repository.officiele-overheidspublicaties.nl/bwb/BWBR0004825/BWBR0004825.xml",
+  "source_url": "https://repository.officiele-overheidspublicaties.nl/bwb/BWBR0004825/2026-07-01_0/xml/BWBR0004825_2026-07-01_0.xml",
+  "citation": "https://wetten.overheid.nl/BWBR0004825/2026-07-01",
   "retrieved": "2026-11-16",
+  "toestand": "2026-07-01",
   "format": "BWB XML",
   "rights": "Officiële bekendmaking. Wettelijke regelingen vallen niet onder het auteursrecht (Auteurswet artikel 11).",
-  "note": "Toestand g=2002-03-30. Geciteerde kaarten staan in rules/rvv_1990.yaml. rules/rvv_1990.example.yaml blijft het voorbeeldarchief."
+  "note": "Toestand g=2026-07-01. Geciteerde kaarten staan in rules/rvv_1990.yaml. rules/rvv_1990.example.yaml blijft het voorbeeldarchief."
 }

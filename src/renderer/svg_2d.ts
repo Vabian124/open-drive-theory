@@ -267,7 +267,7 @@ function actorBody(actor: Actor): string {
     case "military_column":
       return `<g data-cue="military-column"><rect x="-8" y="-28" width="16" height="16" fill="#4a5d23"/><rect x="-8" y="-8" width="16" height="16" fill="#4a5d23"/><rect x="-8" y="12" width="16" height="16" fill="#4a5d23"/></g>`;
     case "funeral_procession":
-      return `<g data-cue="funeral-procession"><circle cx="-8" cy="0" r="4" fill="#6d597a"/><circle cx="0" cy="-6" r="4" fill="#6d597a"/><circle cx="8" cy="0" r="4" fill="#6d597a"/></g>`;
+      return `<g data-cue="funeral-procession"><rect x="-8" y="-22" width="16" height="18" rx="2" fill="#1b1b1b"/><rect x="-8" y="4" width="16" height="18" rx="2" fill="#1b1b1b"/><path data-cue="funeral-mark" d="M8,-34 L18,-30 L8,-26 Z" fill="#f4f1ea" stroke="#111"/></g>`;
     default:
       return `<rect x="-9" y="-16" width="18" height="32" rx="4" fill="${fill}" stroke="#1b1b1b"/><rect x="-7" y="-14" width="14" height="7" rx="1" fill="#d7ecff"/>`;
   }

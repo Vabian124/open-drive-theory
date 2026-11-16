@@ -1,13 +1,12 @@
-# Citaten uit BWBR0004825, toestand g=2002-03-30.
-# Dit is niet de latere nummering. Een kaart met verified: true mag alleen
-# een plicht opleveren die in dit bestand staat. Ontbreekt een kleur of een
-# gebaar, dan blijft het gat staan.
+# Citaten uit BWBR0004825, toestand g=2026-07-01.
+# Een kaart met verified: true mag alleen een plicht opleveren die in dit
+# bestand staat. Ontbreekt een kleur of een gebaar, dan blijft het gat staan.
 # rules/rvv_1990.example.yaml blijft het voorbeeldarchief.
 
 meta:
   jurisdiction: "NL"
-  source_law: "RVV 1990 (BWBR0004825), toestand 2002-03-30"
-  version: "2002-03-30"
+  source_law: "RVV 1990 (BWBR0004825), toestand 2026-07-01"
+  version: "2026-07-01"
 
 hierarchy:
   - rank: 10
@@ -64,7 +63,7 @@ hierarchy:
     rule_id: "RVV-50"
     topic: "priority"
     title: "Voorrangsvoertuig"
-    statutory_text_placeholder: "Artikel 1: voorrangsvoertuig: motorvoertuig dat de optische en geluidssignalen voert als bedoeld in artikel 29. Artikel 29 lid 1: politie, brandweer, ziekenauto's en aangewezen hulpverleningsdiensten voeren blauw zwaai- of knipperlicht en een twee- of drietonige hoorn. Artikel 50: Weggebruikers moeten bestuurders van een voorrangsvoertuig voor laten gaan."
+    statutory_text_placeholder: "Artikel 1: voorrangsvoertuig: motorvoertuig dat de optische en geluidssignalen voert als bedoeld in artikel 29. Artikel 29 lid 1: bestuurders van motorvoertuigen in gebruik bij politie en brandweer, bij diensten voor spoedeisende medische hulpverlening en van andere door Onze Minister aangewezen hulpverleningsdiensten voeren blauw zwaai-, flits- of knipperlicht en een tweetonige hoorn. Artikel 50: Weggebruikers moeten bestuurders van een voorrangsvoertuig voor laten gaan."
     condition_spec: "type emergency en kruisende paden: de ander verliest, ook als die ander op een voorrangsweg rijdt. Twee voorrangsvoertuigen met kruisende paden -> gap RVV-50-two. Artikel 29 lid 2 verwijst naar een ministeriële regeling; die maten worden niet verzonnen."
     overrides: ["RVV-SIGNS-B1-B7", "RVV-16", "RVV-49", "RVV-54", "RVV-15.2a", "RVV-15.2b", "RVV-15.1", "RVV-18.1", "RVV-18.2"]
     verified: true
@@ -73,9 +72,9 @@ hierarchy:
   - rank: 33
     rule_id: "RVV-30"
     topic: "priority"
-    title: "Geel werklicht"
-    statutory_text_placeholder: "Artikel 30 lid 1: Bestuurders van motorvoertuigen, die voor nader aan te geven werkzaamheden worden gebruikt, voeren onder nader aan te geven omstandigheden tijdens deze werkzaamheden geel zwaai- of knipperlicht."
-    condition_spec: "Geel werklicht is geen voorrangssein. De solver kent hieraan geen voorrang toe. De ministeriële maten van lid 2 ontbreken en worden niet verzonnen."
+    title: "Werklicht"
+    statutory_text_placeholder: "Artikel 30 lid 1: Bestuurders van motorvoertuigen die voor nader aan te geven werkzaamheden worden gebruikt, voeren onder nader aan te geven omstandigheden geel of groen zwaai-, flits- of knipperlicht."
+    condition_spec: "Geel of groen werklicht is geen voorrangssein. De solver kent hieraan geen voorrang toe. De ministeriële omstandigheden van lid 2 worden niet verzonnen."
     overrides: []
     verified: true
 
@@ -83,8 +82,8 @@ hierarchy:
     rule_id: "RVV-49"
     topic: "priority"
     title: "Voetgangersoversteekplaats"
-    statutory_text_placeholder: "Artikel 49 lid 2: Bestuurders moeten voetgangers en bestuurders van een gehandicaptenvoertuig, die op een voetgangersoversteekplaats oversteken of kennelijk op het punt staan zulks te doen, voor laten gaan. Lid 3: Het tweede lid geldt niet voor bestuurders van een motorvoertuig dat behoort tot een militaire kolonne. Lid 4: Het tweede lid geldt evenmin, indien voor de voetgangers een rood voetgangerslicht of een geel knipperlicht als bedoeld in artikel 74, tweede lid, van toepassing is."
-    condition_spec: "Markering crosswalk op de arm van de voetganger of de bestuurder, en de paden kruisen. Een uitvaartstoet telt hier als voetgangers (artikel 9). Een military_column verleent deze voorrang niet. signal red op de voetganger schakelt lid 2 uit. Lid 1 (blinden, witte stok) heeft geen gegevensveld en wordt niet verzonnen. Een globaal flashing_amber is artikel 75, niet automatisch het voetgangerslicht van artikel 74 lid 2."
+    statutory_text_placeholder: "Artikel 49 lid 2: Bestuurders moeten voetgangers en bestuurders van een gehandicaptenvoertuig, die op een voetgangersoversteekplaats oversteken of kennelijk op het punt staan zulks te doen, voor laten gaan. Lid 3: Het tweede lid geldt niet voor bestuurders van een motorvoertuig dat behoort tot een militaire colonne of een uitvaartstoet van motorvoertuigen. Lid 4: Het tweede lid geldt evenmin, indien voor de voetgangers en de bestuurders van een gehandicaptenvoertuig een rood voetgangerslicht of een geel knipperlicht als bedoeld in artikel 74, tweede lid, van toepassing is."
+    condition_spec: "Markering crosswalk op de arm van de voetganger of de bestuurder, en de paden kruisen. military_column en funeral_procession verlenen deze voorrang niet (lid 3). signal red op de voetganger schakelt lid 2 uit. Lid 1 (blinden, witte stok) en een bestuurder van een gehandicaptenvoertuig hebben geen gegevensveld en worden niet verzonnen. Een globaal flashing_amber is artikel 75, niet automatisch het voetgangerslicht van artikel 74 lid 2."
     overrides: ["RVV-54", "RVV-15.2a", "RVV-15.2b", "RVV-15.1", "RVV-18.1", "RVV-18.2"]
     verified: true
     required_visual_cues: ["crosswalk"]
@@ -92,9 +91,9 @@ hierarchy:
   - rank: 38
     rule_id: "RVV-16"
     topic: "priority"
-    title: "Militaire kolonne"
-    statutory_text_placeholder: "Artikel 16: Weggebruikers mogen militaire kolonnes niet doorsnijden."
-    condition_spec: "type military_column en kruisende paden: de ander verliest. Twee kolonnes met kruisende paden -> gap RVV-16-two. Dit artikel gaat niet over een uitvaartstoet."
+    title: "Militaire colonne en uitvaartstoet"
+    statutory_text_placeholder: "Artikel 16: Weggebruikers mogen militaire colonnes en uitvaartstoeten van motorvoertuigen niet doorsnijden. Artikel 1: uitvaartstoet van motorvoertuigen: een stoet van motorvoertuigen die een lijk of de as van een gecremeerd lijk begeleiden en die de in artikel 30c bedoelde herkenningstekens voeren. Artikel 30c: die motorvoertuigen voeren een herkenningsteken; bij ministeriële regeling worden regels gesteld over het herkenningsteken en de wijze waarop dit wordt gevoerd."
+    condition_spec: "type military_column en kruisende paden: de ander verliest, ook met B6 op de kolonne. Twee kolonnes -> gap RVV-16-two. type funeral_procession is die stoet van motorvoertuigen. Zonder verkeersregelaar, werkzaam licht, voorrangsbord, haaientanden of voorrangsvoertuig verliest de ander. Bord B6, bord B7 of haaientanden op de stoet gaan voor (artikel 63). Een kolonne tegenover een uitvaartstoet zonder doorslaggevend bord -> gap RVV-16-unranked. Twee uitvaartstoeten -> gap RVV-16-two-funerals. De vorm van het herkenningsteken staat niet in dit besluit en wordt niet verzonnen."
     overrides: ["RVV-SIGNS-B1-B7", "RVV-54", "RVV-15.2a", "RVV-15.2b", "RVV-15.1", "RVV-18.1", "RVV-18.2"]
     verified: true
     required_visual_cues: ["military_column"]
@@ -189,8 +188,8 @@ hierarchy:
     rule_id: "RVV-9"
     topic: "position"
     title: "Uitvaartstoet op de rijbaan"
-    statutory_text_placeholder: "Artikel 9: Voetgangers mogen de rijbaan gebruiken, indien zij een kolonne, een optocht of een uitvaartstoet vormen. Artikel 2: De regels van dit besluit betreffende wagens zijn mede van toepassing op door voetgangers gevormde kolonnes, optochten en uitvaartstoeten voor zover deze de rijbaan volgen."
-    condition_spec: "Plaatsvergunning. Artikel 2 voegt regels voor wagens toe en maakt de stoet geen voorrangswinnaar. Zonder voetgangersoversteekplaats levert de stoet geen plicht op."
+    statutory_text_placeholder: "Artikel 9: Voetgangers mogen de rijbaan gebruiken, indien zij een colonne, een optocht of een uitvaartstoet vormen. Artikel 2: De regels van dit besluit betreffende wagens zijn mede van toepassing op door voetgangers gevormde colonnes, optochten en uitvaartstoeten voor zover deze de rijbaan volgen."
+    condition_spec: "Plaatsvergunning voor voetgangers. Dit actortype funeral_procession is de stoet van motorvoertuigen uit artikel 1 en valt onder RVV-16, niet onder deze kaart."
     overrides: []
     verified: true
     required_visual_cues: ["funeral_procession"]
@@ -224,3 +223,23 @@ hierarchy:
     overrides: []
     verified: true
     required_visual_cues: ["roundabout"]
+
+  - rank: 107
+    rule_id: "RVV-20"
+    topic: "speed"
+    title: "Maximumsnelheid binnen de bebouwde kom"
+    statutory_text_placeholder: "Artikel 20 onderdeel b: voor bromfietsen, binnen de bebouwde kom, op het fiets/bromfietspad 30 km per uur en op de rijbaan 45 km per uur."
+    condition_spec: "Geen voorrang. Bromfiets met G12a binnen de bebouwde kom: 30. Bromfiets op de rijbaan, ook bij alleen G11, binnen de kom: 45. Snorfiets en gehandicaptenvoertuig hebben geen actortype en worden niet verzonnen."
+    overrides: []
+    verified: true
+    required_visual_cues: ["NL:G12a", "built_up_area"]
+
+  - rank: 108
+    rule_id: "RVV-21"
+    topic: "speed"
+    title: "Maximumsnelheid buiten de bebouwde kom"
+    statutory_text_placeholder: "Artikel 21 onderdeel b: voor bromfietsen, buiten de bebouwde kom, op het fiets/bromfietspad 40 km per uur en op de rijbaan 45 km per uur."
+    condition_spec: "Geen voorrang. Bromfiets met G12a buiten de bebouwde kom: 40. Bromfiets op de rijbaan buiten de kom: 45."
+    overrides: []
+    verified: true
+    required_visual_cues: ["NL:G12a", "built_up_area"]
