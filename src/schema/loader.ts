@@ -14,7 +14,7 @@ function readYaml(filePath: string): unknown {
   return parse(readFileSync(filePath, "utf8"));
 }
 
-export function loadRuleFile(filePath = resolve(repoRoot(), "rules/rvv_1990.example.yaml")): RuleFile {
+export function loadRuleFile(filePath = resolve(repoRoot(), "rules/rvv_1990.yaml")): RuleFile {
   return RuleFileSchema.parse(readYaml(filePath));
 }
 

@@ -19,7 +19,7 @@ describe("golden_v1", () => {
     expect(result.applied_rule_ids).toEqual(item.expected.applied_rule_ids);
   });
 
-  it("fails closed when an unverified officer or light rule is in play", () => {
+  it("fails closed when an officer has no gesture or a light has no colour", () => {
     const base = golden.cases[0];
     if (!base) {
       throw new Error("golden file has no cases");

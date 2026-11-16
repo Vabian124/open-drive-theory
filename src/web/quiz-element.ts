@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 import { createFsrsTracker, type FsrsTracker, type RuleMastery } from "../learning/fsrs_tracker.js";
+import { narrateHazard, narratePosition } from "../narrator/explain.js";
+import { withApproachMotion } from "../renderer/motion.js";
 import type { RuleFile } from "../schema/rules.js";
 import type { Category } from "../schema/scenario.js";
 import {
@@ -19,6 +21,9 @@ const RULE_TITLES: Record<string, string> = {
   "RVV-18.2": "Korte bocht voor lange bocht",
   "RVV-54": "Uitrit",
   "RVV-SIGNS-B1-B7": "Borden en haaientanden",
+  "RVV-49": "Voetgangersoversteekplaats",
+  "RVV-50": "Voorrangsvoertuig",
+  "RVV-16": "Militaire kolonne",
 };
 
 const LETTERS = ["A", "B", "C", "D"] as const;
@@ -169,6 +174,22 @@ export class OpenDriveTheoryQuiz extends HTMLElement {
       void this.copy(this.view.seed, button, "Seed gekopieerd");
       return;
     }
+    if (action === "scene" && this.view) {
+      const host = this.shadowRoot?.querySelector("[data-scene]");
+      const scenario = this.view.scenario;
+      if (host instanceof HTMLElement) {
+        host.hidden = false;
+        host.textContent = "3D-aanzicht laden…";
+        void import("./mount_3d.js")
+          .then((mod) => {
+            mod.mountScene(host, scenario);
+          })
+          .catch(() => {
+            host.textContent = "Het 3D-aanzicht kon niet starten.";
+          });
+      }
+      return;
+    }
     if (action === "report") {
       const report = JSON.stringify(this.controller.bugReport(), null, 2);
       const slot = this.shadowRoot?.querySelector("[data-report]");
@@ -188,6 +209,9 @@ export class OpenDriveTheoryQuiz extends HTMLElement {
       return;
     }
     const feedback = this.feedback;
+    const hazard = narrateHazard(view.scenario);
+    const position = narratePosition(view.scenario);
+    const picture = hazard ? withApproachMotion(view.svg) : view.svg;
     const mastery = tracker.getRuleMastery();
     const focus = tracker.getNextFocusRule();
     const category = view.category;
@@ -206,7 +230,9 @@ export class OpenDriveTheoryQuiz extends HTMLElement {
           ${choice("mode", "random", "Willekeurig", mode === "random")}
         </div>
       </header>
-      <figure class="drawing">${view.svg}</figure>
+      <figure class="drawing">${picture}</figure>
+      ${studyBlock("hazard", "Gevaarherkenning", hazard)}
+      ${studyBlock("position", "Positie op de weg", position)}
       <p class="question">${esc(view.question)}</p>
       <div class="options">${view.options
         .map((option, index) => optionButton(option.id, LETTERS[index] ?? String(index + 1), option.text, feedback))
@@ -222,8 +248,10 @@ export class OpenDriveTheoryQuiz extends HTMLElement {
       </section>
       <div class="actions">
         <button type="button" data-action="next"${feedback ? "" : " disabled"}>Volgende vraag</button>
+        <button type="button" data-action="scene">3D-aanzicht</button>
         <button type="button" data-action="report">Meld twijfelgeval</button>
       </div>
+      <div data-scene hidden></div>
       <pre data-report hidden></pre>
       <footer>
         Aangedreven door open-drive-theory (AGPL-3.0) — <a href="${esc(QUIZ_SOURCE_URL)}" target="_blank" rel="noopener noreferrer">Bekijk broncode</a>
@@ -277,6 +305,15 @@ function optionButton(id: string, letter: string, text: string, feedback: QuizFe
   return `<button type="button" class="option${mark}" data-option="${esc(id)}"${disabled}><span>${esc(letter)}</span>${esc(text)}</button>`;
 }
 
+function studyBlock(kind: string, title: string, narration: { question: string; options: readonly string[]; correctIndex: number; explanation: readonly string[] } | null): string {
+  if (!narration) {
+    return "";
+  }
+  const answer = narration.options[narration.correctIndex] ?? "";
+  const lines = narration.explanation.map((line) => `<p>${esc(line)}</p>`).join("");
+  return `<section class="study" data-study="${kind}"><h2>${esc(title)}</h2><p>${esc(narration.question)}</p><p class="study-answer">${esc(answer)}</p>${lines}</section>`;
+}
+
 function feedbackBlock(feedback: QuizFeedback): string {
   const rules = feedback.appliedRuleIds.length > 0 ? feedback.appliedRuleIds.join(", ") : "geen vrijgegeven regel";
   const lines = feedback.explanation.map((line) => `<p>${esc(line)}</p>`).join("");
@@ -304,6 +341,10 @@ function style(): string {
     .controls button[aria-pressed="true"] { background: #1c1915; color: #f4f1ea; border-color: #1c1915; }
     .drawing { margin: 16px 0; background: #fff; border: 1px solid #ddd4c6; }
     .drawing svg { display: block; width: 100%; height: auto; }
+    .study { margin: 12px 0; padding: 12px 14px; background: #fff; border-left: 4px solid #1d4e89; }
+    .study-answer { font-weight: 700; }
+    [data-scene] { margin: 12px 0; background: #fff; border: 1px solid #ddd4c6; }
+    [data-scene] canvas { display: block; width: 100%; height: auto; }
     .question { font-size: 1.15rem; line-height: 1.45; }
     .options { display: grid; gap: 8px; }
     .option { display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%; padding: 12px 14px; border: 1px solid #c9bfb0; background: #fff; border-radius: 8px; }
@@ -324,7 +365,7 @@ function style(): string {
     .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
     .actions button { padding: 10px 14px; border-radius: 8px; border: 1px solid #1c1915; background: #1c1915; color: #f4f1ea; }
     .actions button[disabled] { opacity: 0.45; cursor: default; }
-    .actions button[data-action="report"] { background: #fff; color: #1c1915; }
+    .actions button[data-action="report"], .actions button[data-action="scene"] { background: #fff; color: #1c1915; }
     pre { white-space: pre-wrap; background: #fff; border: 1px solid #ddd4c6; padding: 12px; font-size: 0.8rem; }
     footer { display: block; margin-top: 20px; padding-top: 12px; border-top: 1px solid #c9bfb0; font-size: 0.95rem; }
     footer a { color: #1d4e89; }

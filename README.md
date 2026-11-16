@@ -50,8 +50,12 @@ npm run fetch-law
 - V0.2: seeded generator en Nederlandse vragen voor B, AM en A.
 - V1.0a: bovenaanzicht in SVG, met de publiek-domein borden uit `assets/`.
 - V1.0b: FSRS-leerloop per regel en de quiz `<open-drive-theory-quiz>`.
+- V1.5: gevaarherkenning van vijf seconden op artikel 19, met snelheid, wegdek en obstakels.
+- V2.0: rotondes via bord B6 of haaientanden, en een optioneel Three.js-aanzicht.
 
-Regels met `verified: false` in `rules/rvv_1990.example.yaml` leveren een gat op, geen verzonnen plicht. De ruwe tekst van het RVV 1990 staat in `docs/law/` en is nog niet tot regelkaarten verwerkt.
+De solver leest `rules/rvv_1990.yaml`. De citaten komen uit BWBR0004825 in de toestand van 30 maart 2002. `rules/rvv_1990.example.yaml` blijft het voorbeeldarchief. Een verkeersregelaar zonder gebaar en een actief licht zonder kleur geven nog steeds een gat. Artikel 30 is geen voorrangssein. De artikelen 47 en 48 wijzen op een rotonde geen voorrang toe.
+
+De bronlink is `https://github.com/Vabian124/open-drive-theory`. De repository is nog niet gepubliceerd en niet aan een host gekoppeld.
 
 ## Bijdragen
 

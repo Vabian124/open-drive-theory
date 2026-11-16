@@ -6,7 +6,7 @@
 - [x] **Step 2:** Implement the 5-layer Zod schemas and inferred TypeScript types in `src/schema/scenario.ts`.
 - [x] **Step 3:** Build a YAML loader in `src/schema/loader.ts` that parses `rules/rvv_1990.example.yaml` and `cases/golden_v1.yaml`.
 - [x] **Step 4:** Implement trajectory conflict detection (`src/schema/geometry.ts`, shared by the solver and the generator) using `angle_deg` and `connectors` (relative approach: right, opposite, left, same road).
-- [x] **Step 5:** Implement the deterministic priority solver (`src/solver/priority_solver.ts`) for the duties the golden cases actually lock, in this order: signs and markings (`RVV-SIGNS-B1-B7`), exit when the arm has `curb_type: "beveled"` (`RVV-54`), unpaved road (`RVV-15.2a`), tram (`RVV-15.2b`), traffic from the right (`RVV-15.1`), straight on the same road (`RVV-18.1`), short turn before long turn (`RVV-18.2`). If `traffic_officer` is true or `traffic_lights` is not `"none"`, emit an explicit gap. Those two cards are unverified and no golden case covers them.
+- [x] **Step 5:** Implement the deterministic priority solver (`src/solver/priority_solver.ts`). The live cards are `rules/rvv_1990.yaml`, quoted from BWBR0004825 in the consolidation of 30 March 2002. An officer without a gesture per driver still returns gap `RVV-82`. Active lights without a colour per driver still return gap `RVV-64`. Flashing amber is article 75 and does not cancel signs. Above the older duties sit article 50 (priority vehicle; article 29 defines the signals, article 30 does not yield), article 49 lid 2 (crosswalk), and article 16 (military column). Article 9 permits a funeral on the carriageway and does not by itself create a yield.
 - [x] **Step 6:** Wire up `tests/golden.test.ts` and iterate on `src/solver/` until every case in `cases/golden_v1.yaml` passes. Do not edit that file to make a test pass.
 
 ## Phase V0.2 — Seeded Generator & B / AM / A Narrator
@@ -22,7 +22,16 @@
 - [x] **Step 12:** Integrate `ts-fsrs` (`src/learning/fsrs_tracker.ts`) in `localStorage`, keyed by `applied_rule_ids`. Fuzz stays off. Node tests use an in-memory storage stand-in.
 - [x] **Step 13:** Build the exercise UI and the `<open-drive-theory-quiz>` web component, with a visible AGPL-3.0 section 13 source link and a control that exports the scenario JSON.
 
-## Later, not in V0.1
+## V1.5 — Gevaarherkenning
 
-- V1.5: short hazard-perception animations and ADAS questions, using `speed_kmh`, `road_condition`, and `obstructions`.
-- V2.0: roundabout templates and an optional Three.js skin. The solver stays on layers 1–4.
+- [x] A five-second approach animation (`src/renderer/motion.ts`) when the road is icy, blocked, or wet at 45 km/h or more.
+- [x] The study question cites article 19 from the 2002 text. It does not invent a following distance or an ADAS duty.
+
+## V2.0 — Rotonde en optionele 3D-huid
+
+- [x] Roundabout templates yield through bord B6 or haaientanden. Articles 47 and 48 only relax keep-right and allow passing on the right.
+- [x] The Three.js skin (`src/web/mount_3d.ts`) loads after the button click. The solver still reads only layers 1–4.
+
+## Nog niet gepubliceerd
+
+De bronlink wijst naar `https://github.com/Vabian124/open-drive-theory`. Die repository is vanuit deze werkmap niet aangemaakt, niet gepusht en niet aan een host gekoppeld.

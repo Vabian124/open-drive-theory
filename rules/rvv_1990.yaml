@@ -1,0 +1,226 @@
+# Citaten uit BWBR0004825, toestand g=2002-03-30.
+# Dit is niet de latere nummering. Een kaart met verified: true mag alleen
+# een plicht opleveren die in dit bestand staat. Ontbreekt een kleur of een
+# gebaar, dan blijft het gat staan.
+# rules/rvv_1990.example.yaml blijft het voorbeeldarchief.
+
+meta:
+  jurisdiction: "NL"
+  source_law: "RVV 1990 (BWBR0004825), toestand 2002-03-30"
+  version: "2002-03-30"
+
+hierarchy:
+  - rank: 10
+    rule_id: "RVV-82"
+    topic: "priority"
+    title: "Aanwijzingen"
+    statutory_text_placeholder: "Artikel 82 lid 1: Weggebruikers zijn verplicht de aanwijzingen op te volgen die mondeling of door middel van gebaren worden gegeven door de daartoe bevoegde en als zodanig kenbare ambtenaren, militairen van de Koninklijke Marechaussee en verkeersregelaars. Artikel 84: Aanwijzingen gaan boven verkeerstekens en verkeersregels."
+    condition_spec: "traffic_officer zonder officer_order op elke bestuurder -> gap RVV-82. stop tegenover go: stop verliest, regel RVV-82. Beide stop en kruisende paden -> gap RVV-82-both-stop. Beide go: geen onderscheid, lagere regels blijven beschikbaar."
+    overrides: ["RVV-64", "RVV-68", "RVV-SIGNS-B1-B7", "RVV-50", "RVV-49", "RVV-16", "RVV-54", "RVV-15.2a", "RVV-15.2b", "RVV-15.1", "RVV-18.1", "RVV-18.2"]
+    verified: true
+    required_visual_cues: ["traffic_officer", "officer_order"]
+
+  - rank: 20
+    rule_id: "RVV-64"
+    topic: "priority"
+    title: "Verkeerslichten boven voorrangstekens"
+    statutory_text_placeholder: "Artikel 64: Verkeerslichten gaan boven verkeerstekens die de voorrang regelen."
+    condition_spec: "traffic_lights active zonder signal op elke bestuurder -> gap RVV-64. Actieve lichten onderdrukken voorrangsborden. flashing_amber is artikel 75 en onderdrukt die borden niet."
+    overrides: ["RVV-SIGNS-B1-B7"]
+    verified: true
+    required_visual_cues: ["traffic_lights"]
+
+  - rank: 25
+    rule_id: "RVV-68"
+    topic: "priority"
+    title: "Driekleurig verkeerslicht"
+    statutory_text_placeholder: "Artikel 68 lid 1: groen licht: doorgaan; geel licht: stop; voor bestuurders die het teken zo dicht genaderd zijn dat stoppen redelijkerwijs niet meer mogelijk is: doorgaan; rood licht: stop."
+    condition_spec: "Alleen bij traffic_lights active en een kleur per bestuurder. Rood of geel verliest van groen als de paden kruisen. De uitzondering 'te dicht genaderd' heeft geen afstand in de data en wordt niet verzonnen: geel telt als stop. Beide moeten stoppen -> gap RVV-68-both-stop."
+    overrides: ["RVV-SIGNS-B1-B7", "RVV-54", "RVV-15.2a", "RVV-15.2b", "RVV-15.1", "RVV-18.1", "RVV-18.2"]
+    verified: true
+    required_visual_cues: ["signal"]
+
+  - rank: 28
+    rule_id: "RVV-75"
+    topic: "priority"
+    title: "Geel knipperlicht"
+    statutory_text_placeholder: "Artikel 75: Geel knipperlicht betekent: gevaarlijk punt; voorzichtigheid geboden."
+    condition_spec: "flashing_amber wijst geen voorrang toe en schakelt borden of artikel 15 niet uit."
+    overrides: []
+    verified: true
+    required_visual_cues: ["traffic_lights"]
+
+  - rank: 30
+    rule_id: "RVV-SIGNS-B1-B7"
+    topic: "priority"
+    title: "Voorrangsborden en haaientanden"
+    statutory_text_placeholder: "Bijlage 1: B1 Voorrangsweg. B6 Verleen voorrang aan bestuurders op de kruisende weg. B7 Stop; verleen voorrang aan bestuurders op de kruisende weg. Artikel 80: Haaietanden hebben de volgende betekenis: de bestuurders moeten voorrang verlenen aan bestuurders op de kruisende weg. Artikel 63: Verkeerstekens gaan boven verkeersregels, voor zover deze regels onverenigbaar zijn met deze tekens."
+    condition_spec: "B6, B7 of give_way_triangles op de eigen arm, niet op de andere, en de ander is een bestuurder. B1 op de andere arm zonder voorrangsteken op beide armen. B3, B4 en B5 blijven een gat. Niet van toepassing als de lichten active zijn."
+    overrides: ["RVV-54", "RVV-15.2a", "RVV-15.2b", "RVV-15.1", "RVV-18.1", "RVV-18.2"]
+    verified: true
+    required_visual_cues: ["NL:B1", "NL:B6", "NL:B7", "give_way_triangles"]
+
+  - rank: 32
+    rule_id: "RVV-50"
+    topic: "priority"
+    title: "Voorrangsvoertuig"
+    statutory_text_placeholder: "Artikel 1: voorrangsvoertuig: motorvoertuig dat de optische en geluidssignalen voert als bedoeld in artikel 29. Artikel 29 lid 1: politie, brandweer, ziekenauto's en aangewezen hulpverleningsdiensten voeren blauw zwaai- of knipperlicht en een twee- of drietonige hoorn. Artikel 50: Weggebruikers moeten bestuurders van een voorrangsvoertuig voor laten gaan."
+    condition_spec: "type emergency en kruisende paden: de ander verliest, ook als die ander op een voorrangsweg rijdt. Twee voorrangsvoertuigen met kruisende paden -> gap RVV-50-two. Artikel 29 lid 2 verwijst naar een ministeriële regeling; die maten worden niet verzonnen."
+    overrides: ["RVV-SIGNS-B1-B7", "RVV-16", "RVV-49", "RVV-54", "RVV-15.2a", "RVV-15.2b", "RVV-15.1", "RVV-18.1", "RVV-18.2"]
+    verified: true
+    required_visual_cues: ["emergency"]
+
+  - rank: 33
+    rule_id: "RVV-30"
+    topic: "priority"
+    title: "Geel werklicht"
+    statutory_text_placeholder: "Artikel 30 lid 1: Bestuurders van motorvoertuigen, die voor nader aan te geven werkzaamheden worden gebruikt, voeren onder nader aan te geven omstandigheden tijdens deze werkzaamheden geel zwaai- of knipperlicht."
+    condition_spec: "Geel werklicht is geen voorrangssein. De solver kent hieraan geen voorrang toe. De ministeriële maten van lid 2 ontbreken en worden niet verzonnen."
+    overrides: []
+    verified: true
+
+  - rank: 36
+    rule_id: "RVV-49"
+    topic: "priority"
+    title: "Voetgangersoversteekplaats"
+    statutory_text_placeholder: "Artikel 49 lid 2: Bestuurders moeten voetgangers en bestuurders van een gehandicaptenvoertuig, die op een voetgangersoversteekplaats oversteken of kennelijk op het punt staan zulks te doen, voor laten gaan. Lid 3: Het tweede lid geldt niet voor bestuurders van een motorvoertuig dat behoort tot een militaire kolonne. Lid 4: Het tweede lid geldt evenmin, indien voor de voetgangers een rood voetgangerslicht of een geel knipperlicht als bedoeld in artikel 74, tweede lid, van toepassing is."
+    condition_spec: "Markering crosswalk op de arm van de voetganger of de bestuurder, en de paden kruisen. Een uitvaartstoet telt hier als voetgangers (artikel 9). Een military_column verleent deze voorrang niet. signal red op de voetganger schakelt lid 2 uit. Lid 1 (blinden, witte stok) heeft geen gegevensveld en wordt niet verzonnen. Een globaal flashing_amber is artikel 75, niet automatisch het voetgangerslicht van artikel 74 lid 2."
+    overrides: ["RVV-54", "RVV-15.2a", "RVV-15.2b", "RVV-15.1", "RVV-18.1", "RVV-18.2"]
+    verified: true
+    required_visual_cues: ["crosswalk"]
+
+  - rank: 38
+    rule_id: "RVV-16"
+    topic: "priority"
+    title: "Militaire kolonne"
+    statutory_text_placeholder: "Artikel 16: Weggebruikers mogen militaire kolonnes niet doorsnijden."
+    condition_spec: "type military_column en kruisende paden: de ander verliest. Twee kolonnes met kruisende paden -> gap RVV-16-two. Dit artikel gaat niet over een uitvaartstoet."
+    overrides: ["RVV-SIGNS-B1-B7", "RVV-54", "RVV-15.2a", "RVV-15.2b", "RVV-15.1", "RVV-18.1", "RVV-18.2"]
+    verified: true
+    required_visual_cues: ["military_column"]
+
+  - rank: 40
+    rule_id: "RVV-54"
+    topic: "priority"
+    title: "Uitrit"
+    statutory_text_placeholder: "Artikel 54: Bestuurders die een bijzondere manoeuvre uitvoeren, zoals wegrijden, achteruitrijden, uit een uitrit de weg oprijden, van een weg een inrit oprijden, keren, van de invoegstrook de doorgaande rijbaan oprijden, van de doorgaande rijbaan de uitrijstrook oprijden en van rijstrook wisselen, moeten het overige verkeer voor laten gaan."
+    condition_spec: "curb_type beveled op de eigen arm. Twee uitritten -> gap RVV-54-dual. Alleen bestuurders."
+    overrides: ["RVV-15.2a", "RVV-15.2b", "RVV-15.1", "RVV-18.1", "RVV-18.2"]
+    verified: true
+    required_visual_cues: ["beveled"]
+
+  - rank: 50
+    rule_id: "RVV-15.2a"
+    topic: "priority"
+    title: "Onverharde weg"
+    statutory_text_placeholder: "Artikel 15 lid 2 onder a: bestuurders op een onverharde weg verlenen voorrang aan bestuurders op een verharde weg."
+    condition_spec: "surface unpaved tegenover paved, beide bestuurders, kruisende paden. Oneens met de tram -> gap RVV-15.2a-versus-15.2b."
+    overrides: ["RVV-15.1", "RVV-18.1", "RVV-18.2"]
+    verified: true
+    required_visual_cues: ["unpaved"]
+
+  - rank: 60
+    rule_id: "RVV-15.2b"
+    topic: "priority"
+    title: "Tram"
+    statutory_text_placeholder: "Artikel 15 lid 2 onder b: bestuurders verlenen voorrang aan bestuurders van een tram."
+    condition_spec: "De ander is een tram en de paden kruisen. Twee trams -> gap RVV-15.2b-two-trams."
+    overrides: ["RVV-15.1", "RVV-18.1", "RVV-18.2"]
+    verified: true
+    required_visual_cues: ["tram"]
+
+  - rank: 70
+    rule_id: "RVV-15.1"
+    topic: "priority"
+    title: "Voorrang van rechts"
+    statutory_text_placeholder: "Artikel 15 lid 1: Op kruispunten verlenen bestuurders voorrang aan voor hen van rechts komende bestuurders."
+    condition_spec: "Beide bestuurders, kruisende paden, de ander komt van rechts."
+    overrides: ["RVV-18.1", "RVV-18.2"]
+    verified: true
+
+  - rank: 80
+    rule_id: "RVV-18.1"
+    topic: "priority"
+    title: "Rechtdoor op dezelfde weg"
+    statutory_text_placeholder: "Artikel 18 lid 1: Bestuurders die afslaan, moeten het verkeer dat hen op dezelfde weg tegemoet komt of dat op dezelfde weg zich naast dan wel links of rechts dicht achter hen bevindt, voor laten gaan. Lid 3: Het eerste en het tweede lid gelden niet voor bestuurders van een tram."
+    condition_spec: "Dezelfde as, de een slaat af en de ander gaat rechtdoor, de afslaande is geen tram."
+    overrides: []
+    verified: true
+
+  - rank: 90
+    rule_id: "RVV-18.2"
+    topic: "priority"
+    title: "Korte bocht voor lange bocht"
+    statutory_text_placeholder: "Artikel 18 lid 2: Bestuurders die naar links afslaan, moeten tegemoetkomende bestuurders die op hetzelfde kruispunt naar rechts afslaan voor laten gaan."
+    condition_spec: "Tegengestelde armen, links verliest van rechts, de linksafslaande is geen tram."
+    overrides: []
+    verified: true
+
+  - rank: 100
+    rule_id: "RVV-6"
+    topic: "position"
+    title: "Plaats van de bromfiets"
+    statutory_text_placeholder: "Artikel 6 lid 1: Bromfietsers gebruiken het fiets/bromfietspad. Lid 2: Zij gebruiken de rijbaan indien een fiets/bromfietspad ontbreekt. Bijlage 1: G11 Verplicht fietspad. G12a Fiets/bromfietspad."
+    condition_spec: "Geen voorrangsregel. Bromfiets met G12a op de eigen arm gebruikt het fiets/bromfietspad. Alleen G11: dat is geen fiets/bromfietspad, dus de rijbaan. Lid 3 (breder dan 0,75 m) heeft geen breedteveld en wordt niet verzonnen."
+    overrides: []
+    verified: true
+    required_visual_cues: ["NL:G11", "NL:G12a"]
+
+  - rank: 101
+    rule_id: "RVV-3"
+    topic: "position"
+    title: "Rechts houden"
+    statutory_text_placeholder: "Artikel 3 lid 1: Bestuurders zijn verplicht zoveel mogelijk rechts te houden."
+    condition_spec: "Plaatsadvies voor een motor bij een fietspad, fiets/bromfietspad of een vrijliggend fietspad. Geen voorrangsregel."
+    overrides: []
+    verified: true
+
+  - rank: 102
+    rule_id: "RVV-10"
+    topic: "position"
+    title: "Plaats van andere bestuurders"
+    statutory_text_placeholder: "Artikel 10 lid 1: Andere bestuurders dan die genoemd in de artikelen 5 tot en met 8 gebruiken de rijbaan. Lid 2: Andere bestuurders dan fietsers en bestuurders van een gehandicaptenvoertuig mogen fietsstroken met doorgetrokken strepen niet gebruiken."
+    condition_spec: "Een motor gebruikt de rijbaan, niet het verplichte fietspad of het fiets/bromfietspad. Een onderbroken fietsstrook wordt niet verboden: lid 2 noemt alleen doorgetrokken strepen."
+    overrides: []
+    verified: true
+    required_visual_cues: ["cycleway"]
+
+  - rank: 103
+    rule_id: "RVV-9"
+    topic: "position"
+    title: "Uitvaartstoet op de rijbaan"
+    statutory_text_placeholder: "Artikel 9: Voetgangers mogen de rijbaan gebruiken, indien zij een kolonne, een optocht of een uitvaartstoet vormen. Artikel 2: De regels van dit besluit betreffende wagens zijn mede van toepassing op door voetgangers gevormde kolonnes, optochten en uitvaartstoeten voor zover deze de rijbaan volgen."
+    condition_spec: "Plaatsvergunning. Artikel 2 voegt regels voor wagens toe en maakt de stoet geen voorrangswinnaar. Zonder voetgangersoversteekplaats levert de stoet geen plicht op."
+    overrides: []
+    verified: true
+    required_visual_cues: ["funeral_procession"]
+
+  - rank: 104
+    rule_id: "RVV-19"
+    topic: "hazard"
+    title: "Tot stilstand kunnen komen"
+    statutory_text_placeholder: "Artikel 19: De bestuurder moet in staat zijn zijn voertuig tot stilstand te brengen binnen de afstand waarover hij de weg kan overzien en waarover deze vrij is."
+    condition_spec: "Oefenvraag bij ijzel, een obstakel, of een natte weg met hoge snelheid. Geen voorrangsregel en geen verzonnen volgafstand."
+    overrides: []
+    verified: true
+    required_visual_cues: ["road_condition", "obstructions", "speed_kmh"]
+
+  - rank: 105
+    rule_id: "RVV-47"
+    topic: "roundabout"
+    title: "Plaats op een rotonde"
+    statutory_text_placeholder: "Artikel 47: Het is bestuurders van een motorvoertuig en bromfietsers die de rijbaan volgen toegestaan vlak voor of op rotondes anders dan aan de rechterzijde van de rijbaan te rijden."
+    condition_spec: "Geen voorrang. Op een rotonde beslist bord B6 of haaientanden wie er voor gaat."
+    overrides: []
+    verified: true
+    required_visual_cues: ["roundabout"]
+
+  - rank: 106
+    rule_id: "RVV-48"
+    topic: "roundabout"
+    title: "Rechts inhalen op een rotonde"
+    statutory_text_placeholder: "Artikel 48: Het is bestuurders toegestaan vlak voor of op rotondes rechts in te halen."
+    condition_spec: "Geen voorrang. De solver blijft op de lagen infra, borden, omgeving en bestuurders."
+    overrides: []
+    verified: true
+    required_visual_cues: ["roundabout"]

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 import { z } from "zod";
 
-export const IntersectionTypeSchema = z.enum(["four_way", "t_junction", "exit_construction"]);
+export const IntersectionTypeSchema = z.enum(["four_way", "t_junction", "exit_construction", "roundabout"]);
 export const SurfaceSchema = z.enum(["paved", "unpaved"]);
 export const CurbTypeSchema = z.enum(["standard", "beveled"]);
 export const CyclewaySchema = z.enum(["none", "lane", "track"]);
@@ -33,7 +33,11 @@ export const ActorTypeSchema = z.enum([
   "cyclist",
   "pedestrian",
   "emergency",
+  "military_column",
+  "funeral_procession",
 ]);
+export const SignalSchema = z.enum(["red", "amber", "green"]);
+export const OfficerOrderSchema = z.enum(["stop", "go"]);
 export const CategorySchema = z.enum(["B", "AM", "A"]);
 
 export const ArmSchema = z
@@ -109,6 +113,8 @@ export const ActorSchema = z
     to_arm: z.string().min(1),
     speed_kmh: z.number().nonnegative(),
     is_candidate: z.boolean(),
+    signal: SignalSchema.optional(),
+    officer_order: OfficerOrderSchema.optional(),
   })
   .strict();
 

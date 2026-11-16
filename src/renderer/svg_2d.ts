@@ -263,7 +263,11 @@ function actorBody(actor: Actor): string {
     case "pedestrian":
       return `<circle cx="0" cy="-8" r="5" fill="#6d597a"/><rect x="-4" y="-2" width="8" height="14" rx="2" fill="#6d597a"/>`;
     case "emergency":
-      return `<rect x="-9" y="-16" width="18" height="32" rx="4" fill="#e63946" stroke="#111"/><rect x="-7" y="-16" width="14" height="4" fill="#8ecae6"/>`;
+      return `<rect x="-9" y="-16" width="18" height="32" rx="4" fill="#e63946" stroke="#111"/><rect data-cue="blue-beacon" x="-7" y="-16" width="14" height="4" fill="#4cc9f0"/>`;
+    case "military_column":
+      return `<g data-cue="military-column"><rect x="-8" y="-28" width="16" height="16" fill="#4a5d23"/><rect x="-8" y="-8" width="16" height="16" fill="#4a5d23"/><rect x="-8" y="12" width="16" height="16" fill="#4a5d23"/></g>`;
+    case "funeral_procession":
+      return `<g data-cue="funeral-procession"><circle cx="-8" cy="0" r="4" fill="#6d597a"/><circle cx="0" cy="-6" r="4" fill="#6d597a"/><circle cx="8" cy="0" r="4" fill="#6d597a"/></g>`;
     default:
       return `<rect x="-9" y="-16" width="18" height="32" rx="4" fill="${fill}" stroke="#1b1b1b"/><rect x="-7" y="-14" width="14" height="7" rx="1" fill="#d7ecff"/>`;
   }
@@ -286,7 +290,9 @@ function actors(scenario: Scenario, arms: ReadonlyMap<string, Arm>): string {
       const badge = actor.is_candidate
         ? `<text data-badge="JIJ" x="${fmt(labelAt.x)}" y="${fmt(labelAt.y)}" text-anchor="middle" font-size="14" font-family="sans-serif" font-weight="700" fill="#7a4b00">JIJ</text>`
         : "";
-      return `<g data-actor="${esc(actor.type)}" data-actor-id="${esc(actor.id)}" data-candidate="${actor.is_candidate ? "true" : "false"}" transform="translate(${fmt(position.x)} ${fmt(position.y)}) rotate(${fmt(headingFromUp(outward))})">${actor.is_candidate ? `<circle r="28" fill="#f4c430" fill-opacity="0.35"/>` : ""}${actorBody(actor)}${turnMark(actorTurn(scenario, actor))}</g>${badge}`;
+      const signal = actor.signal ? ` data-signal="${esc(actor.signal)}"` : "";
+      const order = actor.officer_order ? ` data-order="${esc(actor.officer_order)}"` : "";
+      return `<g data-actor="${esc(actor.type)}" data-actor-id="${esc(actor.id)}" data-candidate="${actor.is_candidate ? "true" : "false"}"${signal}${order} transform="translate(${fmt(position.x)} ${fmt(position.y)}) rotate(${fmt(headingFromUp(outward))})">${actor.is_candidate ? `<circle r="28" fill="#f4c430" fill-opacity="0.35"/>` : ""}${actorBody(actor)}${turnMark(actorTurn(scenario, actor))}</g>${badge}`;
     })
     .join("");
 }
@@ -352,8 +358,17 @@ function environment(scenario: Scenario, arms: ReadonlyMap<string, Arm>): string
           .map((arm) => {
             const outward = svgOutward(arm.angle_deg);
             const position = at(outward, approachRight(outward), 78, -(ROAD_HALF + 14));
-            const lamp = scenario.environment.traffic_lights === "flashing_amber" ? "#f4c430" : "#f7f7f7";
-            return `<g data-signal="${scenario.environment.traffic_lights}" transform="translate(${fmt(position.x)} ${fmt(position.y)})"><rect x="-5" y="-12" width="10" height="24" rx="2" fill="#222"/><circle cy="-6" r="2" fill="${lamp}"/></g>`;
+            const actor = scenario.actors.find((item) => item.from_arm === arm.arm_id);
+            const lamp =
+              actor?.signal === "green"
+                ? "#3dba6c"
+                : actor?.signal === "red"
+                  ? "#d7263d"
+                  : actor?.signal === "amber" || scenario.environment.traffic_lights === "flashing_amber"
+                    ? "#f4c430"
+                    : "#f7f7f7";
+            const aspect = actor?.signal ?? scenario.environment.traffic_lights;
+            return `<g data-signal="${esc(aspect)}" transform="translate(${fmt(position.x)} ${fmt(position.y)})"><rect x="-5" y="-12" width="10" height="24" rx="2" fill="#222"/><circle cy="-6" r="2" fill="${lamp}"/></g>`;
           })
           .join("");
   const officer = scenario.environment.traffic_officer
@@ -375,7 +390,7 @@ export function renderScenarioSvg(scenario: Scenario): string {
     `<metadata>odt-signature:${sig}</metadata>`,
     `<defs><pattern id="${patternId}" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#c6a36a"/><circle cx="2" cy="2" r="0.8" fill="#8d6b3a"/><circle cx="6" cy="5" r="0.7" fill="#a98450"/></pattern></defs>`,
     `<rect data-built-up="${scenario.environment.built_up_area ? "true" : "false"}" data-road-condition="${scenario.environment.road_condition}" width="${SIZE}" height="${SIZE}" fill="${ground}"/>`,
-    `<g data-layer="infra">${scenario.infra.arms.map((arm) => armPolygon(arm, scenario.environment.road_condition, patternId)).join("")}<circle cx="${fmt(CENTER + mark)}" cy="${fmt(CENTER)}" r="${fmt(ROAD_HALF + 2)}" fill="${junctionFill}" data-signature-mark="1"/></g>`,
+    `<g data-layer="infra">${scenario.infra.arms.map((arm) => armPolygon(arm, scenario.environment.road_condition, patternId)).join("")}<circle cx="${fmt(CENTER + mark)}" cy="${fmt(CENTER)}" r="${fmt(ROAD_HALF + 2)}" fill="${junctionFill}" data-signature-mark="1"/>${scenario.infra.intersection_type === "roundabout" ? `<circle data-roundabout="true" cx="${CENTER}" cy="${CENTER}" r="54" fill="none" stroke="#f7f7f7" stroke-width="14"/><circle data-cue="roundabout-island" cx="${CENTER}" cy="${CENTER}" r="28" fill="#7d9a62"/>` : ""}</g>`,
     `<g data-layer="cycleways">${scenario.infra.arms.map((arm) => cyclewayTrack(arm) + cyclewayLane(arm)).join("")}</g>`,
     `<g data-layer="exit">${scenario.infra.arms.filter((arm) => arm.curb_type === "beveled").map((arm) => beveledCurb(arm)).join("")}</g>`,
     `<g data-layer="markings">${scenario.static_signs.markings.map((item) => { const arm = arms.get(item.arm_id); return arm ? marking(arm, item.type) : ""; }).join("")}</g>`,

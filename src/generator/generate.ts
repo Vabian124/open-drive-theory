@@ -21,8 +21,8 @@ interface Blueprint {
   ruleId: string;
   intersectionType: Scenario["infra"]["intersection_type"];
   arms: Array<{ angle: number; surface: Surface; curb: Curb; cycleway: Cycleway }>;
-  signs: Array<{ angle: number; code: "NL:B1" | "NL:B6" | "NL:B7" }>;
-  markings: Array<{ angle: number; type: "give_way_triangles" }>;
+  signs: Array<{ angle: number; code: "NL:B1" | "NL:B6" | "NL:B7" | "NL:G11" | "NL:G12a" }>;
+  markings: Array<{ angle: number; type: "give_way_triangles" | "crosswalk" }>;
   candidate: { from: number; to: number; turn: Turn };
   other: { from: number; to: number; turn: Turn; types: readonly ActorType[] };
 }
@@ -116,7 +116,82 @@ const BLUEPRINTS: readonly Blueprint[] = [
     candidate: { from: 0, to: 180, turn: "straight" },
     other: { from: 90, to: 270, turn: "straight", types: ["car", "tram", "cyclist", "moped"] },
   },
+  {
+    ruleId: "RVV-49",
+    intersectionType: "four_way",
+    arms: [0, 90, 180, 270].map((angle) => ({ angle, surface: "paved", curb: "standard", cycleway: "none" })),
+    signs: [],
+    markings: [{ angle: 270, type: "crosswalk" }],
+    candidate: { from: 0, to: 180, turn: "straight" },
+    other: { from: 270, to: 90, turn: "straight", types: ["pedestrian"] },
+  },
+  {
+    ruleId: "RVV-50",
+    intersectionType: "four_way",
+    arms: [0, 90, 180, 270].map((angle) => ({ angle, surface: "paved", curb: "standard", cycleway: "none" })),
+    signs: [],
+    markings: [],
+    candidate: { from: 0, to: 180, turn: "straight" },
+    other: { from: 270, to: 90, turn: "straight", types: ["emergency"] },
+  },
+  {
+    ruleId: "RVV-16",
+    intersectionType: "four_way",
+    arms: [0, 90, 180, 270].map((angle) => ({ angle, surface: "paved", curb: "standard", cycleway: "none" })),
+    signs: [],
+    markings: [],
+    candidate: { from: 0, to: 180, turn: "straight" },
+    other: { from: 270, to: 90, turn: "straight", types: ["military_column"] },
+  },
 ];
+
+const paved = [0, 90, 180, 270].map((angle) => ({
+  angle,
+  surface: "paved" as const,
+  curb: "standard" as const,
+  cycleway: "none" as const,
+}));
+
+const PRACTICE: readonly Blueprint[] = [
+  {
+    ruleId: "RVV-SIGNS-B1-B7",
+    intersectionType: "roundabout",
+    arms: paved,
+    signs: [{ angle: 0, code: "NL:B6" }],
+    markings: [{ angle: 0, type: "give_way_triangles" }],
+    candidate: { from: 0, to: 180, turn: "straight" },
+    other: { from: 90, to: 270, turn: "straight", types: ["car"] },
+  },
+  {
+    ruleId: "RVV-6",
+    intersectionType: "four_way",
+    arms: paved,
+    signs: [{ angle: 0, code: "NL:G12a" }],
+    markings: [],
+    candidate: { from: 0, to: 180, turn: "straight" },
+    other: { from: 270, to: 90, turn: "straight", types: ["car"] },
+  },
+  {
+    ruleId: "RVV-6",
+    intersectionType: "four_way",
+    arms: paved,
+    signs: [{ angle: 0, code: "NL:G11" }],
+    markings: [],
+    candidate: { from: 0, to: 180, turn: "straight" },
+    other: { from: 270, to: 90, turn: "straight", types: ["car"] },
+  },
+  {
+    ruleId: "RVV-10",
+    intersectionType: "four_way",
+    arms: paved.map((arm) => ({ ...arm, cycleway: arm.angle === 0 ? "track" : "none" })),
+    signs: [],
+    markings: [],
+    candidate: { from: 0, to: 180, turn: "straight" },
+    other: { from: 270, to: 90, turn: "straight", types: ["car"] },
+  },
+];
+
+const POOL: readonly Blueprint[] = [...BLUEPRINTS, ...PRACTICE];
 
 export const FOCUS_RULE_IDS: readonly string[] = BLUEPRINTS.map((blueprint) => blueprint.ruleId);
 
@@ -243,7 +318,7 @@ export function generate(seed: string, focusRuleId?: string): Scenario {
     throw new Error(`focusRuleId "${focusRuleId}" heeft geen vrijgegeven sjabloon.`);
   }
   const rng = mulberry32(hashSeed(parsed.raw));
-  const chosen = blueprint ?? pick(rng, BLUEPRINTS);
+  const chosen = blueprint ?? pick(rng, POOL);
   const rotation = pick(rng, [0, 90, 180, 270] as const);
   const otherType = pick(rng, chosen.other.types);
   const scenario = build(chosen, rotation, parsed.category, otherType, rng);
@@ -252,4 +327,37 @@ export function generate(seed: string, focusRuleId?: string): Scenario {
     throw new Error(`Generator overtrad constraint "${violation}" voor seed ${parsed.raw}.`);
   }
   return scenario;
+}
+
+function built(blueprint: Blueprint, seed: string): Scenario {
+  const parsed = parseSeed(seed);
+  const rng = mulberry32(hashSeed(`${parsed.raw}:${blueprint.ruleId}:${blueprint.intersectionType}`));
+  const scenario = build(blueprint, 0, parsed.category, blueprint.other.types[0] ?? "car", rng);
+  const violation = constraintViolation(scenario);
+  if (violation) {
+    throw new Error(`Generator overtrad constraint "${violation}" voor seed ${parsed.raw}.`);
+  }
+  return scenario;
+}
+
+export function generateRoundabout(seed: string): Scenario {
+  const blueprint = PRACTICE.find((item) => item.intersectionType === "roundabout");
+  if (!blueprint) {
+    throw new Error("Rotondesjabloon ontbreekt.");
+  }
+  return built(blueprint, seed);
+}
+
+export function generateRoadPosition(seed: string, kind: "g11" | "g12a" | "motorcycle"): Scenario {
+  const blueprint = PRACTICE.find((item) => {
+    if (kind === "motorcycle") {
+      return item.ruleId === "RVV-10";
+    }
+    const code = kind === "g12a" ? "NL:G12a" : "NL:G11";
+    return item.signs.some((sign) => sign.code === code);
+  });
+  if (!blueprint) {
+    throw new Error(`Plaatssjabloon "${kind}" ontbreekt.`);
+  }
+  return built(blueprint, seed);
 }

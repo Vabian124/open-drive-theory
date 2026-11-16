@@ -10,6 +10,9 @@ export const TRACKED_RULE_IDS = [
   "RVV-18.2",
   "RVV-54",
   "RVV-SIGNS-B1-B7",
+  "RVV-49",
+  "RVV-50",
+  "RVV-16",
 ] as const;
 
 export type TrackedRuleId = (typeof TRACKED_RULE_IDS)[number];

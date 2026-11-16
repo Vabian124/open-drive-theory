@@ -86,5 +86,8 @@ describe("quiz controller", () => {
     expect(element).not.toMatch(/node:fs|node:path/);
     expect(controller).not.toMatch(/node:fs|node:path/);
     expect(page).toContain("<open-drive-theory-quiz");
+    const source = readFileSync(new URL("../src/web/source.ts", import.meta.url), "utf8");
+    expect(source).toContain("https://github.com/Vabian124/open-drive-theory");
+    expect(source).not.toContain("PLACEHOLDER");
   });
 });

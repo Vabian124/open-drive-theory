@@ -28,7 +28,11 @@ function empty(gaps: string[]): SolveResult {
 }
 
 function isDriver(actor: Actor): boolean {
-  return actor.type !== "pedestrian";
+  return actor.type !== "pedestrian" && actor.type !== "funeral_procession";
+}
+
+function isOnFoot(actor: Actor): boolean {
+  return actor.type === "pedestrian" || actor.type === "funeral_procession";
 }
 
 function armMap(scenario: Scenario): Map<string, Arm> {
@@ -92,7 +96,7 @@ function signDuty(a: Actor, b: Actor, scenario: Scenario, arms: ReadonlyMap<stri
 }
 
 function driverYieldsBySign(ego: Actor, other: Actor, scenario: Scenario): boolean {
-  if (!isDriver(ego)) {
+  if (!isDriver(ego) || !isDriver(other)) {
     return false;
   }
   const egoYield = hasYieldMark(scenario, ego.from_arm);
@@ -106,6 +110,9 @@ function driverYieldsBySign(ego: Actor, other: Actor, scenario: Scenario): boole
 }
 
 function exitDuty(a: Actor, b: Actor, arms: ReadonlyMap<string, Arm>): PairResult {
+  if (!isDriver(a) || !isDriver(b)) {
+    return { kind: "none" };
+  }
   const aExit = arms.get(a.from_arm)?.curb_type === "beveled";
   const bExit = arms.get(b.from_arm)?.curb_type === "beveled";
   if (aExit && bExit) {
@@ -167,7 +174,7 @@ function rightDuty(a: Actor, b: Actor, arms: ReadonlyMap<string, Arm>): Duty | n
 }
 
 function sameRoadDuty(a: Actor, b: Actor, arms: ReadonlyMap<string, Arm>): Duty | null {
-  if (!pathsInteract(a, b, arms) || !sameAxis(a, b, arms)) {
+  if (!isDriver(a) || !isDriver(b) || !pathsInteract(a, b, arms) || !sameAxis(a, b, arms)) {
     return null;
   }
   const turnA = turnOf(a, arms);
@@ -182,6 +189,9 @@ function sameRoadDuty(a: Actor, b: Actor, arms: ReadonlyMap<string, Arm>): Duty 
 }
 
 function shortTurnDuty(a: Actor, b: Actor, arms: ReadonlyMap<string, Arm>): Duty | null {
+  if (!isDriver(a) || !isDriver(b)) {
+    return null;
+  }
   const fromA = arms.get(a.from_arm);
   const fromB = arms.get(b.from_arm);
   if (!fromA || !fromB || !isOpposite(fromA.angle_deg, fromB.angle_deg) || !pathsInteract(a, b, arms)) {
@@ -198,6 +208,102 @@ function shortTurnDuty(a: Actor, b: Actor, arms: ReadonlyMap<string, Arm>): Duty
   return null;
 }
 
+function stops(actor: Actor): boolean {
+  return actor.signal === "red" || actor.signal === "amber";
+}
+
+function officerDuty(a: Actor, b: Actor, scenario: Scenario, arms: ReadonlyMap<string, Arm>): PairResult {
+  if (!scenario.environment.traffic_officer || !pathsInteract(a, b, arms)) {
+    return { kind: "none" };
+  }
+  const orderA = a.officer_order;
+  const orderB = b.officer_order;
+  if ((orderA !== "stop" && orderA !== "go") || (orderB !== "stop" && orderB !== "go")) {
+    return { kind: "none" };
+  }
+  if (orderA === "stop" && orderB === "go") {
+    return { kind: "duty", duty: { loser: a.id, winner: b.id, ruleId: "RVV-82" } };
+  }
+  if (orderB === "stop" && orderA === "go") {
+    return { kind: "duty", duty: { loser: b.id, winner: a.id, ruleId: "RVV-82" } };
+  }
+  if (orderA === "stop" && orderB === "stop") {
+    return { kind: "gap", id: "RVV-82-both-stop" };
+  }
+  return { kind: "none" };
+}
+
+function lightDuty(a: Actor, b: Actor, scenario: Scenario, arms: ReadonlyMap<string, Arm>): PairResult {
+  if (scenario.environment.traffic_lights !== "active" || !pathsInteract(a, b, arms)) {
+    return { kind: "none" };
+  }
+  const stopA = stops(a);
+  const stopB = stops(b);
+  if (stopA && b.signal === "green") {
+    return { kind: "duty", duty: { loser: a.id, winner: b.id, ruleId: "RVV-68" } };
+  }
+  if (stopB && a.signal === "green") {
+    return { kind: "duty", duty: { loser: b.id, winner: a.id, ruleId: "RVV-68" } };
+  }
+  if (stopA && stopB) {
+    return { kind: "gap", id: "RVV-68-both-stop" };
+  }
+  return { kind: "none" };
+}
+
+function emergencyDuty(a: Actor, b: Actor, arms: ReadonlyMap<string, Arm>): PairResult {
+  const aEmergency = a.type === "emergency";
+  const bEmergency = b.type === "emergency";
+  if (!aEmergency && !bEmergency) {
+    return { kind: "none" };
+  }
+  if (!pathsInteract(a, b, arms)) {
+    return { kind: "none" };
+  }
+  if (aEmergency && bEmergency) {
+    return { kind: "gap", id: "RVV-50-two" };
+  }
+  return aEmergency
+    ? { kind: "duty", duty: { loser: b.id, winner: a.id, ruleId: "RVV-50" } }
+    : { kind: "duty", duty: { loser: a.id, winner: b.id, ruleId: "RVV-50" } };
+}
+
+function hasCrosswalk(scenario: Scenario, armId: string): boolean {
+  return scenario.static_signs.markings.some((marking) => marking.arm_id === armId && marking.type === "crosswalk");
+}
+
+function crosswalkDuty(a: Actor, b: Actor, scenario: Scenario, arms: ReadonlyMap<string, Arm>): PairResult {
+  const foot = isOnFoot(a) ? a : isOnFoot(b) ? b : undefined;
+  const driver = foot === a ? b : foot === b ? a : undefined;
+  if (!foot || !driver || !isDriver(driver) || driver.type === "military_column" || !pathsInteract(a, b, arms)) {
+    return { kind: "none" };
+  }
+  if (foot.signal === "red") {
+    return { kind: "none" };
+  }
+  if (!hasCrosswalk(scenario, foot.from_arm) && !hasCrosswalk(scenario, driver.from_arm)) {
+    return { kind: "none" };
+  }
+  return { kind: "duty", duty: { loser: driver.id, winner: foot.id, ruleId: "RVV-49" } };
+}
+
+function columnDuty(a: Actor, b: Actor, arms: ReadonlyMap<string, Arm>): PairResult {
+  const aColumn = a.type === "military_column";
+  const bColumn = b.type === "military_column";
+  if (!aColumn && !bColumn) {
+    return { kind: "none" };
+  }
+  if (!pathsInteract(a, b, arms)) {
+    return { kind: "none" };
+  }
+  if (aColumn && bColumn) {
+    return { kind: "gap", id: "RVV-16-two" };
+  }
+  return aColumn
+    ? { kind: "duty", duty: { loser: b.id, winner: a.id, ruleId: "RVV-16" } }
+    : { kind: "duty", duty: { loser: a.id, winner: b.id, ruleId: "RVV-16" } };
+}
+
 function decidePair(
   a: Actor,
   b: Actor,
@@ -205,7 +311,37 @@ function decidePair(
   arms: ReadonlyMap<string, Arm>,
   active: ReadonlySet<string>,
 ): PairResult {
-  if (active.has("RVV-SIGNS-B1-B7")) {
+  if (active.has("RVV-82")) {
+    const officer = officerDuty(a, b, scenario, arms);
+    if (officer.kind !== "none") {
+      return officer;
+    }
+  }
+  if (active.has("RVV-68")) {
+    const lights = lightDuty(a, b, scenario, arms);
+    if (lights.kind !== "none") {
+      return lights;
+    }
+  }
+  if (active.has("RVV-50")) {
+    const emergency = emergencyDuty(a, b, arms);
+    if (emergency.kind !== "none") {
+      return emergency;
+    }
+  }
+  if (active.has("RVV-49")) {
+    const crossing = crosswalkDuty(a, b, scenario, arms);
+    if (crossing.kind !== "none") {
+      return crossing;
+    }
+  }
+  if (active.has("RVV-16")) {
+    const column = columnDuty(a, b, arms);
+    if (column.kind !== "none") {
+      return column;
+    }
+  }
+  if (scenario.environment.traffic_lights !== "active" && active.has("RVV-SIGNS-B1-B7")) {
     const signs = signDuty(a, b, scenario, arms);
     if (signs) {
       return { kind: "duty", duty: signs };
@@ -279,13 +415,34 @@ function orderByDuties(ids: string[], duties: Duty[]): string[] | null {
   return ordered.length === ids.length ? ordered : null;
 }
 
+function instructionGaps(scenario: Scenario): string[] {
+  const gaps: string[] = [];
+  if (
+    scenario.environment.traffic_officer &&
+    scenario.actors.some((actor) => actor.officer_order !== "stop" && actor.officer_order !== "go")
+  ) {
+    gaps.push("RVV-82");
+  }
+  if (
+    scenario.environment.traffic_lights === "active" &&
+    scenario.actors.some((actor) => actor.signal !== "red" && actor.signal !== "amber" && actor.signal !== "green")
+  ) {
+    gaps.push("RVV-64");
+  }
+  return gaps;
+}
+
 export function solve(scenario: Scenario, rules: RuleFile): SolveResult {
-  const gaps = rules.hierarchy.filter((card) => !card.verified && unverifiedGap(card, scenario)).map((card) => card.rule_id);
+  const gaps = [
+    ...instructionGaps(scenario),
+    ...rules.hierarchy.filter((card) => !card.verified && unverifiedGap(card, scenario)).map((card) => card.rule_id),
+  ];
   if (scenario.static_signs.signs.some((sign) => DIAGRAM_SIGNS.has(sign.code))) {
     gaps.push("b3-b4-b5-diagram");
   }
-  if (gaps.length > 0) {
-    return empty(gaps);
+  const unique = [...new Set(gaps)];
+  if (unique.length > 0) {
+    return empty(unique);
   }
 
   const active = new Set(rules.hierarchy.filter((card) => card.verified).map((card) => card.rule_id));

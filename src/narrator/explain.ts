@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 import { classifyTurn } from "../schema/geometry.js";
 import { NarrationSchema, type Narration } from "../schema/narration.js";
+import { roadPosition } from "../schema/position.js";
 import {
   EvaluationSchema,
   ScenarioSchema,
@@ -17,6 +18,15 @@ const RULE_GLOSS: Record<string, string> = {
   "RVV-18.2": "De korte bocht gaat voor op de lange bocht.",
   "RVV-54": "Wie een uitrit verlaat, laat het overige verkeer voorgaan.",
   "RVV-SIGNS-B1-B7": "Bord B6, bord B7 of haaientanden verplichten tot voorrang verlenen. Bord B1 merkt de voorrangsweg.",
+  "RVV-50": "Weggebruikers laten een voorrangsvoertuig voorgaan. Dat voert het blauwe licht en de hoorn van artikel 29.",
+  "RVV-49": "Op een voetgangersoversteekplaats laat u de overstekende voetganger voorgaan.",
+  "RVV-16": "U mag een militaire kolonne niet doorsnijden.",
+  "RVV-68": "Rood of geel licht betekent stop. Groen licht betekent doorgaan.",
+  "RVV-82": "U volgt de aanwijzing van de verkeersregelaar. Die gaat boven borden en regels.",
+  "RVV-6": "Een bromfiets gebruikt het fiets/bromfietspad, en anders de rijbaan.",
+  "RVV-3": "U houdt zoveel mogelijk rechts.",
+  "RVV-10": "U gebruikt de rijbaan.",
+  "RVV-19": "U moet kunnen stoppen binnen de afstand die u overziet en die vrij is.",
 };
 
 function noun(type: Actor["type"]): string {
@@ -35,6 +45,10 @@ function noun(type: Actor["type"]): string {
       return "voetganger";
     case "emergency":
       return "voorrangsvoertuig";
+    case "military_column":
+      return "militaire kolonne";
+    case "funeral_procession":
+      return "uitvaartstoet";
     default:
       return "bestuurder";
   }
@@ -82,10 +96,11 @@ function correctText(scenario: Scenario, evaluation: Evaluation, candidate: Acto
   if (labels.length === 0) {
     return "U hoeft niemand voor te laten gaan.";
   }
-  if (labels.length === 1) {
-    return `U moet de ${labels[0]} voor laten gaan.`;
+  const named = labels.map((label) => `${label === "voorrangsvoertuig" ? "het" : "de"} ${label}`);
+  if (named.length === 1) {
+    return `U moet ${named[0]} voor laten gaan.`;
   }
-  return `U moet de ${labels.join(" en de ")} voor laten gaan.`;
+  return `U moet ${named.join(" en ")} voor laten gaan.`;
 }
 
 function mistakePool(scenario: Scenario, evaluation: Evaluation): string[] {
@@ -116,6 +131,21 @@ function mistakePool(scenario: Scenario, evaluation: Evaluation): string[] {
   }
   if (rules.has("RVV-15.1")) {
     pool.push("U gaat rechtdoor, dus kruisend verkeer wacht op u.");
+  }
+  if (rules.has("RVV-50")) {
+    pool.push("Een voorrangsvoertuig wacht, want u rijdt op de voorrangsweg.");
+  }
+  if (rules.has("RVV-49")) {
+    pool.push("Een voetganger op een zebrapad wacht op bestuurders.");
+  }
+  if (rules.has("RVV-16")) {
+    pool.push("U mag een militaire kolonne doorsnijden als u van rechts komt.");
+  }
+  if (rules.has("RVV-68")) {
+    pool.push("Rood licht geldt alleen als er geen bestuurder van rechts komt.");
+  }
+  if (rules.has("RVV-82")) {
+    pool.push("Een verkeersregelaar geldt alleen als het bord hetzelfde zegt.");
   }
   pool.push(
     "U hoeft niemand voor te laten gaan.",
@@ -162,7 +192,44 @@ function explanation(scenario: Scenario, evaluation: Evaluation, candidate: Acto
     .filter((actor): actor is Actor => actor !== undefined)
     .map((actor) => (actor.is_candidate ? "u" : `de ${actorLabel(actor, candidate)}`));
   lines.push(`De volgorde om te gaan is: ${order.join(", daarna ")}.`);
+  if (scenario.environment.traffic_lights === "active") {
+    lines.push("RVV-64: Verkeerslichten gaan boven verkeerstekens die de voorrang regelen.");
+  }
+  if (scenario.infra.intersection_type === "roundabout") {
+    lines.push("RVV-47 en RVV-48 laten een andere plaats op de rijbaan en rechts inhalen toe. Zij wijzen geen voorrang toe.");
+  }
+  const place = roadPosition(scenario);
+  if (place) {
+    for (const ruleId of place.ruleIds) {
+      lines.push(`${ruleId}: ${place.text}`);
+    }
+  }
   return lines;
+}
+
+function gapLine(gap: string): string {
+  if (gap === "RVV-82") {
+    return "RVV-82: er is een verkeersregelaar, maar geen aanwijzing per bestuurder.";
+  }
+  if (gap === "RVV-64") {
+    return "RVV-64: de lichten zijn actief, maar er is geen kleur per bestuurder.";
+  }
+  if (gap === "RVV-68-both-stop") {
+    return "RVV-68: beide bestuurders moeten stoppen. Daaruit volgt geen volgorde om te gaan.";
+  }
+  if (gap === "RVV-82-both-stop") {
+    return "RVV-82: beide bestuurders moeten stoppen. Daaruit volgt geen volgorde om te gaan.";
+  }
+  if (gap === "RVV-50-two") {
+    return "RVV-50: twee voorrangsvoertuigen. De tekst wijst geen onderlinge volgorde aan.";
+  }
+  if (gap === "RVV-16-two") {
+    return "RVV-16: twee militaire kolonnes. De tekst wijst geen onderlinge volgorde aan.";
+  }
+  if (gap === "b3-b4-b5-diagram") {
+    return "b3-b4-b5-diagram: dit bord krijgt in deze toestand geen voorrangsplicht.";
+  }
+  return `${gap}: hieruit volgt geen volgorde.`;
 }
 
 export function narrateScenario(scenario: Scenario, evaluation: Evaluation): Narration {
@@ -174,15 +241,15 @@ export function narrateScenario(scenario: Scenario, evaluation: Evaluation): Nar
   }
   if (parsedEvaluation.gaps.length > 0) {
     return NarrationSchema.parse({
-      question: "Deze situatie gebruikt een regel die nog niet is vrijgegeven. Wat doet u?",
+      question: "Deze situatie geeft geen volgorde. Wat doet u?",
       options: [
-        "U wacht tot de ontbrekende regel is vastgesteld.",
-        "U rijdt door, want een onbekende regel telt niet.",
+        "U wacht. De ontbrekende aanwijzing, kleur of regel wijst geen volgorde aan.",
+        "U rijdt door, want een ontbrekend gegeven telt niet.",
         "U laat alleen verkeer van rechts voorgaan.",
         "U behandelt de situatie als een uitrit.",
       ],
       correctIndex: 0,
-      explanation: parsedEvaluation.gaps.map((gap) => `Nog niet vrijgegeven: ${gap}.`),
+      explanation: parsedEvaluation.gaps.map((gap) => gapLine(gap)),
     });
   }
   const move = maneuver(parsedScenario, candidate);
@@ -194,5 +261,56 @@ export function narrateScenario(scenario: Scenario, evaluation: Evaluation): Nar
     options: placed.options,
     correctIndex: placed.correctIndex,
     explanation: explanation(parsedScenario, parsedEvaluation, candidate, move),
+  });
+}
+
+export function narratePosition(scenario: Scenario): Narration | null {
+  const place = roadPosition(ScenarioSchema.parse(scenario));
+  if (!place) {
+    return null;
+  }
+  const wrong = [
+    "U rijdt op het verplichte fietspad, ook als dat bord alleen G11 is.",
+    "U houdt het midden van de rijbaan aan.",
+    "U gebruikt het trottoir omdat u langzaam rijdt.",
+  ];
+  return NarrationSchema.parse({
+    question: "Welke plaats op de weg schrijft het reglement u voor?",
+    options: [place.text, ...wrong],
+    correctIndex: 0,
+    explanation: place.ruleIds.map((ruleId) => `${ruleId}: ${place.text}`),
+  });
+}
+
+export function narrateHazard(scenario: Scenario): Narration | null {
+  const parsed = ScenarioSchema.parse(scenario);
+  const candidate = parsed.actors.find((actor) => actor.is_candidate);
+  if (!candidate) {
+    return null;
+  }
+  const blocked = parsed.environment.obstructions.length > 0;
+  const icy = parsed.environment.road_condition === "icy";
+  const wetFast = parsed.environment.road_condition === "wet" && candidate.speed_kmh >= 45;
+  if (!blocked && !icy && !wetFast) {
+    return null;
+  }
+  const reason = icy
+    ? "Het wegdek is glad."
+    : blocked
+      ? "Een obstakel beperkt het vrije zicht."
+      : "De weg is nat en uw snelheid is hoog.";
+  return NarrationSchema.parse({
+    question: `${reason} Wat eist artikel 19 van u?`,
+    options: [
+      "U moet kunnen stoppen binnen de afstand die u overziet en die vrij is.",
+      "Een hulpsysteem houdt de volgafstand aan, dus u hoeft niet te remmen.",
+      "Geel knipperlicht wijst u de voorrang toe.",
+      "U mag doorrijden zolang u binnen de bebouwde kom blijft.",
+    ],
+    correctIndex: 0,
+    explanation: [
+      "RVV-19: De bestuurder moet in staat zijn zijn voertuig tot stilstand te brengen binnen de afstand waarover hij de weg kan overzien en waarover deze vrij is.",
+      "Dit is een oefening over artikel 19. Het is geen voorrangsuitspraak.",
+    ],
   });
 }

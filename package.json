@@ -1,9 +1,13 @@
 {
   "name": "open-drive-theory",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Deterministic open-source Dutch traffic theory engine (B, AM, A) based on OpenDRIVE topology and OSM tags.",
   "license": "AGPL-3.0-only",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Vabian124/open-drive-theory.git"
+  },
   "type": "module",
   "scripts": {
     "test": "vitest run",
@@ -16,6 +20,7 @@
     "build": "vite build"
   },
   "dependencies": {
+    "three": "^0.180.0",
     "ts-fsrs": "4.7.1",
     "yaml": "^2.5.0",
     "zod": "^3.23.8"
