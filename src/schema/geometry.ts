@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-import type { Actor, Arm } from "../schema/scenario.js";
+import type { Actor, Arm } from "./scenario.js";
 
 /** Arm angle, clockwise from south: 0 south, 90 west, 180 north, 270 east. */
 export interface Point {
@@ -80,7 +80,14 @@ export function pathsInteract(a: Actor, b: Actor, arms: ReadonlyMap<string, Arm>
   if (!aFrom || !aTo || !bFrom || !bTo) {
     return false;
   }
-  if (segmentsProperlyIntersect(armPoint(aFrom.angle_deg), armPoint(aTo.angle_deg), armPoint(bFrom.angle_deg), armPoint(bTo.angle_deg))) {
+  if (
+    segmentsProperlyIntersect(
+      armPoint(aFrom.angle_deg),
+      armPoint(aTo.angle_deg),
+      armPoint(bFrom.angle_deg),
+      armPoint(bTo.angle_deg),
+    )
+  ) {
     return true;
   }
   if (!isOpposite(aFrom.angle_deg, bFrom.angle_deg)) {

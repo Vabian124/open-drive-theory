@@ -202,7 +202,18 @@ export const GoldenFileSchema = z
   })
   .strict();
 
+export const EvaluationSchema = z
+  .object({
+    gaps: z.array(z.string()),
+    priority_order: z.array(z.string()),
+    candidate_yields_to: z.array(z.string()),
+    applied_rule_ids: z.array(z.string()),
+  })
+  .strict();
+
+export type Category = z.infer<typeof CategorySchema>;
 export type Scenario = z.infer<typeof ScenarioSchema>;
+export type Evaluation = z.infer<typeof EvaluationSchema>;
 export type GoldenCase = z.infer<typeof GoldenCaseSchema>;
 export type GoldenFile = z.infer<typeof GoldenFileSchema>;
 export type Actor = z.infer<typeof ActorSchema>;

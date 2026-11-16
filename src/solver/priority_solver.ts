@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-import type { Actor, Arm, Scenario } from "../schema/scenario.js";
+import type { Actor, Arm, Evaluation, Scenario } from "../schema/scenario.js";
 import type { RuleCard, RuleFile } from "../schema/rules.js";
 import {
   approachHeading,
@@ -8,17 +8,12 @@ import {
   isOpposite,
   pathsInteract,
   type TurnKind,
-} from "./geometry.js";
+} from "../schema/geometry.js";
 
 const DIAGRAM_SIGNS = new Set(["NL:B3", "NL:B4", "NL:B5"]);
 const YIELD_SIGNS = new Set(["NL:B6", "NL:B7"]);
 
-export interface SolveResult {
-  gaps: string[];
-  priority_order: string[];
-  candidate_yields_to: string[];
-  applied_rule_ids: string[];
-}
+export type SolveResult = Evaluation;
 
 interface Duty {
   loser: string;
