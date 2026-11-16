@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 import { armPoint, classifyTurn, type TurnKind } from "../schema/geometry.js";
 import type { Actor, Arm, Scenario } from "../schema/scenario.js";
+import { OFFICIAL_SIGN_SVG } from "./official_signs.js";
 
 const SIZE = 800;
 const CENTER = 400;
@@ -187,7 +188,17 @@ function signGlyph(code: Scenario["static_signs"]["signs"][number]["code"]): str
   return `<polygon points="0,-16 14,12 -14,12" fill="#fff7e6" stroke="#d00000" stroke-width="2"/><line x1="0" y1="-8" x2="0" y2="8" stroke="#111" stroke-width="3"/>${side}`;
 }
 
-function signs(scenario: Scenario, arms: ReadonlyMap<string, Arm>): string {
+function embedOfficial(svg: string, prefix: string): string {
+  const inner = svg.replace(/<\?xml[^?]*\?>/g, "").replace(/^<svg[^>]*>/i, "").replace(/<\/svg>\s*$/i, "");
+  const scoped = inner
+    .replace(/\bid=(["'])([^"']+)\1/g, (_match, quote: string, id: string) => `id=${quote}${prefix}${id}${quote}`)
+    .replace(/url\(#([^)]+)\)/g, (_match, id: string) => `url(#${prefix}${id})`)
+    .replace(/xlink:href=(["'])#([^"']+)\1/g, (_match, quote: string, id: string) => `xlink:href=${quote}#${prefix}${id}${quote}`)
+    .replace(/(?<![:\w])href=(["'])#([^"']+)\1/g, (_match, quote: string, id: string) => `href=${quote}#${prefix}${id}${quote}`);
+  return `<svg xmlns="http://www.w3.org/2000/svg" x="-16" y="-16" width="32" height="32" viewBox="0 0 100 100" data-official="true">${scoped}</svg>`;
+}
+
+function signs(scenario: Scenario, arms: ReadonlyMap<string, Arm>, sig: string): string {
   const counts = new Map<string, number>();
   return scenario.static_signs.signs
     .map((sign) => {
@@ -200,10 +211,12 @@ function signs(scenario: Scenario, arms: ReadonlyMap<string, Arm>): string {
       const outward = svgOutward(arm.angle_deg);
       const right = approachRight(outward);
       const position = at(outward, right, 150 + slot * 42, ROAD_HALF + 28);
+      const official = OFFICIAL_SIGN_SVG[sign.code];
+      const glyph = official ? embedOfficial(official, `${sig}-${sign.arm_id}-${slot}-`) : signGlyph(sign.code);
       const plate = sign.sub_sign
         ? `<rect x="-18" y="18" width="36" height="12" fill="#ffffff" stroke="#222"/><text y="27" text-anchor="middle" font-size="6" font-family="sans-serif">${esc(sign.sub_sign)}</text>`
         : "";
-      return `<g data-sign="${esc(sign.code)}" data-arm="${esc(sign.arm_id)}" transform="translate(${fmt(position.x)} ${fmt(position.y)})">${signGlyph(sign.code)}${plate}</g>`;
+      return `<g data-sign="${esc(sign.code)}" data-official="${official ? "true" : "false"}" data-arm="${esc(sign.arm_id)}" transform="translate(${fmt(position.x)} ${fmt(position.y)})">${glyph}${plate}</g>`;
     })
     .join("");
 }
@@ -367,7 +380,7 @@ export function renderScenarioSvg(scenario: Scenario): string {
     `<g data-layer="exit">${scenario.infra.arms.filter((arm) => arm.curb_type === "beveled").map((arm) => beveledCurb(arm)).join("")}</g>`,
     `<g data-layer="markings">${scenario.static_signs.markings.map((item) => { const arm = arms.get(item.arm_id); return arm ? marking(arm, item.type) : ""; }).join("")}</g>`,
     `<g data-layer="rails">${rails(scenario, arms)}</g>`,
-    `<g data-layer="signs">${signs(scenario, arms)}</g>`,
+    `<g data-layer="signs">${signs(scenario, arms, sig)}</g>`,
     `<g data-layer="environment">${environment(scenario, arms)}</g>`,
     `<g data-layer="actors">${actors(scenario, arms)}</g>`,
     `</svg>`,

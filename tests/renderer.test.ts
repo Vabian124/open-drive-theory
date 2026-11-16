@@ -46,6 +46,7 @@ describe("svg renderer", () => {
     const signs = caseSvg("example_case_05_tram_equal_vs_signs");
     expect(signs).toContain('data-sign="NL:B1"');
     expect(signs).toContain('data-sign="NL:B6"');
+    expect(signs).toContain('data-official="true"');
     expect(signs).toContain('data-marking="give_way_triangles"');
     expect(signs).toContain('data-actor="tram"');
     expect(signs).toContain('data-rails="tram"');
