@@ -19,8 +19,8 @@
 
 - [x] **Step 10:** Create `scripts/fetch-assets.ts` to normalize Wikimedia `NL:*` SVG signs into a `100x100` viewBox. The public-domain files live in `assets/` with `assets/manifest.json`, and the renderer embeds them from `src/renderer/official_signs.ts` (no filesystem access in the browser).
 - [x] **Step 11:** Build the top-down SVG renderer (`src/renderer/svg_2d.ts`) from layers 1–4, including beveled curbs and unpaved texture.
-- [ ] **Step 12:** Integrate `ts-fsrs` (`src/learning/fsrs_tracker.ts`) in `localStorage`, keyed by `applied_rule_ids`.
-- [ ] **Step 13:** Build the exercise UI and the `<open-drive-theory-quiz>` web component, with a visible AGPL-3.0 section 13 source link and a control that exports the scenario JSON.
+- [x] **Step 12:** Integrate `ts-fsrs` (`src/learning/fsrs_tracker.ts`) in `localStorage`, keyed by `applied_rule_ids`. Fuzz stays off. Node tests use an in-memory storage stand-in.
+- [x] **Step 13:** Build the exercise UI and the `<open-drive-theory-quiz>` web component, with a visible AGPL-3.0 section 13 source link and a control that exports the scenario JSON.
 
 ## Later, not in V0.1
 

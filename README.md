@@ -28,8 +28,12 @@ Hoeken lopen met de klok mee vanaf het zuiden: `0` onder, `90` links, `180` bove
 npm install
 npm test
 npm run typecheck
+npm run dev
+npm run build
 npm run preview
 ```
+
+`npm run dev` opent de oefenquiz. `npm run build` schrijft die naar `dist/`.
 
 `npm run preview` schrijft `preview/index.html` met de zes golden cases. Dat HTML-bestand blijft buiten git.
 
@@ -45,6 +49,7 @@ npm run fetch-law
 - V0.1: Zod-schema, voorrangssolver en `cases/golden_v1.yaml`.
 - V0.2: seeded generator en Nederlandse vragen voor B, AM en A.
 - V1.0a: bovenaanzicht in SVG, met de publiek-domein borden uit `assets/`.
+- V1.0b: FSRS-leerloop per regel en de quiz `<open-drive-theory-quiz>`.
 
 Regels met `verified: false` in `rules/rvv_1990.example.yaml` leveren een gat op, geen verzonnen plicht. De ruwe tekst van het RVV 1990 staat in `docs/law/` en is nog niet tot regelkaarten verwerkt.
 
