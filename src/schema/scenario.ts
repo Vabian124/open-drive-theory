@@ -183,6 +183,15 @@ function refineScenario(scenario: z.infer<typeof ScenarioObjectSchema>, ctx: z.R
         });
       }
     }
+    for (const [index, obstruction] of scenario.environment.obstructions.entries()) {
+      if (!knownArm(ids, obstruction.near_arm)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Obstruction references an unknown arm",
+          path: ["environment", "obstructions", index],
+        });
+      }
+    }
 }
 
 export const ScenarioSchema = ScenarioObjectSchema.superRefine(refineScenario);

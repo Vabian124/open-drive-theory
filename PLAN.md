@@ -34,4 +34,4 @@
 
 ## Publicatie
 
-De bronlink wijst naar `https://github.com/Vabian124/open-drive-theory`. `.github/workflows/deploy.yml` bouwt met `npm run build` en publiceert `dist` naar GitHub Pages.
+De bronlink wijst naar `https://github.com/Vabian124/open-drive-theory`. De quiz staat op `https://vabian124.github.io/open-drive-theory/`. `.github/workflows/deploy.yml` draait `npm run typecheck`, `npm test` en `npm run build`, en publiceert `dist` naar GitHub Pages.

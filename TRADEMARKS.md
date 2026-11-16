@@ -10,7 +10,7 @@ AGPL-3.0 does not grant trademark rights.
 
 The following names, logos, and domains are reserved for the project maintainers and are not licensed with the code:
 
-- The consumer web or mobile product name and logo, to be chosen at the V1.0 launch. The repository name `open-drive-theory` is the name of the engine, not that consumer brand.
+- The repository name `open-drive-theory` identifies the engine. No separate consumer product name or logo is licensed with the code.
 - Official project domains and CDN hostnames.
 
 ## 3. Guidelines for Forks and Hosted Copies

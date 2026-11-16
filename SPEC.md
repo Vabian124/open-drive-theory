@@ -55,17 +55,20 @@ A generator must reject `NL:B1` together with `give_way_triangles` on the same a
 
 ### Layer 4: `actors`
 
-- `id`, `type`: `"car" | "motorcycle" | "moped" | "tram" | "cyclist" | "pedestrian" | "emergency"`
+- `id`, `type`: `"car" | "motorcycle" | "moped" | "tram" | "cyclist" | "pedestrian" | "emergency" | "military_column" | "funeral_procession"`
 - `from_arm`, `to_arm`, `speed_kmh`
 - `is_candidate`: boolean. Exactly one actor is the candidate.
+- `signal`: optional `"red" | "amber" | "green"`
+- `officer_order`: optional `"stop" | "go"`
 
 ### Layer 5: `evaluation` (written only by `src/solver/`)
 
-- `question_type`: `"priority" | "road_position" | "hazard_perception"`
+- `gaps`: named gaps when a verified duty cannot produce an order
 - `priority_order`: actor ids, first to go through last to go
 - `candidate_yields_to`: actor ids the candidate must let pass first
 - `applied_rule_ids`: ids from `rules/`
-- `distractor_mistakes`: `{ mistaken_order, mistake_reason_id }[]` for multiple choice
+
+The narrator builds the Dutch question, the options, and the study panels for position, speed, and hazard. Those texts are not fields of `evaluation`.
 
 The solver reads layers 1–4 and writes layer 5. The renderer reads layers 1–4 and does not import the solver.
 
@@ -73,16 +76,15 @@ The solver reads layers 1–4 and writes layer 5. The renderer reads layers 1–
 
 The segmented text of RVV 1990 (`BWBR0004825`) belongs in `rules/rvv_1990.yaml`, produced from the statute rather than from memory.
 
-Until that file exists, `src/solver/` implements only the cards in `rules/rvv_1990.example.yaml` whose `verified` flag is `true`. A card with `verified: false` is a gap: the solver names the gap and does not invent a duty. Sentences wrapped in `[EXAMPLE]` are not quotations. Two ids are already fixed against the statute and must not be swapped:
+`rules/rvv_1990.yaml` quotes BWBR0004825, toestand 2026-07-01. `rules/rvv_1990.example.yaml` stays the archive. A card with `verified: false` does not invent a duty. An officer without a gesture and active lights without a colour return a gap. Sentences wrapped in `[EXAMPLE]` are not quotations. Two ids are fixed against the statute and must not be swapped:
 
 - `RVV-15.2a` — article 15 lid 2 onder a: a driver on an unpaved road yields to a driver on a paved road.
 - `RVV-15.2b` — article 15 lid 2 onder b: a driver yields to the driver of a tram.
 
-## 4. What V0.1 does not decide
+## 4. What stays undecided
 
-Do not encode these as settled duties until `rules/rvv_1990.yaml` cites the article:
+The live cards quote the duties they implement, including articles 63, 64, 82, and 84, and article 30 as a light that assigns no yield. These points still have no card, and the solver must not invent them:
 
-- The exact wording of articles 62, 63, 76–81, and 82, and therefore the rank of a traffic officer against lights.
-- Whether working lights switch off article 54, or only the priority signs.
 - A metre threshold for a paved apron on a sand road, and for “same road” beside a separated cycle track.
-- The individual Bijlage 1 wording of sign series A, C, D, and F beyond the example cards.
+- The individual Bijlage 1 wording of sign series A, C, D, and F. `NL:B2` and `NL:C1` are public-domain assets, and the scenario schema does not accept them until a card states their duty.
+- Articles 62 and 76–81, beyond the haaientanden sentence of article 80 that the sign card already quotes.
